@@ -3,6 +3,7 @@ name: Build Flet APK
 on:
   push:
     branches: [ "main", "master" ] # o la rama que uses
+    workflow_dispatch:  # <--- Esto añade el botón de ejecución manual
 
 jobs:
   build:
