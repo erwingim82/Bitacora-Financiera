@@ -48,9 +48,6 @@ def main(page: ft.Page):
         snack.open = True
         page.update()
 
-    def abrir_url_externa(url: str):
-        page.launch_url(url)
-
     # ==========================================
     # 2. DIÁLOGO "ACERCA DE" Y SUGERENCIAS
     # ==========================================
@@ -64,7 +61,7 @@ def main(page: ft.Page):
                     ft.Icon(ft.Icons.EMAIL, color=ft.Colors.BLUE_400), 
                     ft.Text("Enviar Sugerencia / Soporte", color=ft.Colors.BLUE_400)
                 ], alignment=ft.MainAxisAlignment.CENTER, tight=True), 
-                on_click=lambda _: abrir_url_externa("mailto:myconsultingsca@gmail.com?subject=Sugerencias%20Bitacora%20Financiera")
+                on_click=lambda _: page.launch_url("mailto:myconsultingsca@gmail.com?subject=Sugerencias%20Bitacora%20Financiera", mode=ft.LaunchMode.EXTERNAL_APPLICATION)
             )
         ], tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
         actions=[ft.TextButton("Cerrar", on_click=lambda _: cerrar_dialogo(dialogo_acerca))]
@@ -81,7 +78,7 @@ def main(page: ft.Page):
         page.update()
 
     # ==========================================
-    # 3. FUNCIONES DE ACCIÓN SUPERIOR
+    # 3. FUNCIONES DE ACCIÓN SUPERIOR (WHATSAPP Y DOLAR)
     # ==========================================
     def mostrar_opciones_compartir(e):
         try:
@@ -111,7 +108,9 @@ def main(page: ft.Page):
 
             reporte = f"📊 *BITÁCORA FINANCIERA*\n💰 Saldo Actual: *${saldo_total:.2f}*\n\n*HISTORIAL DE MOVIMIENTOS:*\n{texto_movimientos}"
             reporte_codificado = urllib.parse.quote(reporte)
-            url_whatsapp = f"https://api.whatsapp.com/send?text={reporte_codificado}"
+            
+            # Esquema directo para WhatsApp igual que el proyecto de préstamos
+            url_whatsapp = f"whatsapp://send?text={reporte_codificado}"
 
             dialogo_compartir = ft.AlertDialog(
                 title=ft.Text("Exportar Reporte", weight=ft.FontWeight.BOLD),
@@ -123,7 +122,7 @@ def main(page: ft.Page):
                         icon=ft.Icons.SHARE,
                         color=ft.Colors.WHITE,
                         bgcolor=ft.Colors.GREEN_600,
-                        on_click=lambda _: abrir_url_externa(url_whatsapp)
+                        on_click=lambda _: page.launch_url(url_whatsapp, mode=ft.LaunchMode.EXTERNAL_APPLICATION)
                     )
                 ], tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
                 actions=[ft.TextButton("Cerrar", on_click=lambda _: cerrar_dialogo(dialogo_compartir))]
@@ -144,7 +143,7 @@ def main(page: ft.Page):
                     icon=ft.Icons.OPEN_IN_BROWSER,
                     color=ft.Colors.WHITE,
                     bgcolor=ft.Colors.BLUE_600,
-                    on_click=lambda _: abrir_url_externa("https://www.dolarvzla.com/")
+                    on_click=lambda _: page.launch_url("https://www.dolarvzla.com/", mode=ft.LaunchMode.EXTERNAL_APPLICATION)
                 )
             ], tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             actions=[ft.TextButton("Cerrar", on_click=lambda _: cerrar_dialogo(dialogo_dolar))]
