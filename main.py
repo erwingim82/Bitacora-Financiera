@@ -48,13 +48,6 @@ def main(page: ft.Page):
         snack.open = True
         page.update()
 
-    # Función corregida para abrir DolarVzla en Android/Desktop
-    def abrir_dolar_vzla(e):
-        try:
-            page.launch_url("https://www.dolarvzla.com/")
-        except Exception as ex:
-            notificar(f"No se pudo abrir DolarVzla: {ex}", ft.Colors.RED_700)
-
     # ==========================================
     # 2. DIÁLOGO "ACERCA DE" Y SUGERENCIAS
     # ==========================================
@@ -76,9 +69,9 @@ def main(page: ft.Page):
     page.overlay.append(dialogo_acerca)
 
     # ==========================================
-    # 3. FUNCIÓN DE EXPORTAR POR WHATSAPP (CORREGIDA)
+    # 3. FUNCIONES DE ACCIÓN SUPERIOR (DIÁLOGOS MÓVILES SEGUROS)
     # ==========================================
-    def exportar_whatsapp(e):
+    def mostrar_opciones_compartir(e):
         try:
             conexion = sqlite3.connect(DB_NAME)
             cursor = conexion.cursor()
@@ -106,11 +99,49 @@ def main(page: ft.Page):
 
             reporte = f"📊 *BITÁCORA FINANCIERA*\n💰 Saldo Actual: *${saldo_total:.2f}*\n\n*HISTORIAL DE MOVIMIENTOS:*\n{texto_movimientos}"
             reporte_codificado = urllib.parse.quote(reporte)
-            
             url_whatsapp = f"https://api.whatsapp.com/send?text={reporte_codificado}"
-            page.launch_url(url_whatsapp)
+
+            dialogo_compartir = ft.AlertDialog(
+                title=ft.Text("Exportar Reporte", weight=ft.FontWeight.BOLD),
+                content=ft.Column([
+                    ft.Text("Selecciona una opción para enviar tu bitácora:", size=13, color=ft.Colors.WHITE_70),
+                    ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+                    ft.ElevatedButton(
+                        "Enviar por WhatsApp",
+                        icon=ft.Icons.SHARE,
+                        color=ft.Colors.WHITE,
+                        bgcolor=ft.Colors.GREEN_600,
+                        on_click=lambda _: page.launch_url(url_whatsapp)
+                    )
+                ], tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+                actions=[ft.TextButton("Cerrar", on_click=lambda _: setattr(dialogo_compartir, "open", False) or page.update())]
+            )
+            page.overlay.append(dialogo_compartir)
+            dialogo_compartir.open = True
+            page.update()
+
         except Exception as ex:
-            notificar(f"Error al exportar: {ex}", ft.Colors.RED_700)
+            notificar(f"Error al generar reporte: {ex}", ft.Colors.RED_700)
+
+    def abrir_dolar_vzla(e):
+        dialogo_dolar = ft.AlertDialog(
+            title=ft.Text("Consulta de Tasas", weight=ft.FontWeight.BOLD),
+            content=ft.Column([
+                ft.Text("Haz clic en el botón para consultar las tasas actualizadas en DolarVzla.", size=13),
+                ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+                ft.ElevatedButton(
+                    "Ir a DolarVzla.com",
+                    icon=ft.Icons.OPEN_IN_BROWSER,
+                    color=ft.Colors.WHITE,
+                    bgcolor=ft.Colors.BLUE_600,
+                    on_click=lambda _: page.launch_url("https://www.dolarvzla.com/")
+                )
+            ], tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+            actions=[ft.TextButton("Cerrar", on_click=lambda _: setattr(dialogo_dolar, "open", False) or page.update())]
+        )
+        page.overlay.append(dialogo_dolar)
+        dialogo_dolar.open = True
+        page.update()
 
     # ==========================================
     # 4. INTERFAZ PRINCIPAL
@@ -125,7 +156,7 @@ def main(page: ft.Page):
                 icon=ft.Icons.SHARE,
                 icon_color=ft.Colors.GREEN_400,
                 tooltip="Exportar por WhatsApp",
-                on_click=exportar_whatsapp
+                on_click=mostrar_opciones_compartir
             ),
             ft.IconButton(
                 icon=ft.Icons.CURRENCY_EXCHANGE,
