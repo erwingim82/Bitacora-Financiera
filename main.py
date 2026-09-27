@@ -48,12 +48,12 @@ def main(page: ft.Page):
         snack.open = True
         page.update()
 
-    # Función para abrir DolarVzla
+    # Función corregida para abrir DolarVzla en Android/Desktop
     def abrir_dolar_vzla(e):
         try:
             page.launch_url("https://www.dolarvzla.com/")
-        except:
-            notificar("No se pudo abrir el enlace de DolarVzla", ft.Colors.RED_700)
+        except Exception as ex:
+            notificar(f"No se pudo abrir DolarVzla: {ex}", ft.Colors.RED_700)
 
     # ==========================================
     # 2. DIÁLOGO "ACERCA DE" Y SUGERENCIAS
@@ -76,7 +76,7 @@ def main(page: ft.Page):
     page.overlay.append(dialogo_acerca)
 
     # ==========================================
-    # 3. FUNCIÓN DE EXPORTAR POR WHATSAPP
+    # 3. FUNCIÓN DE EXPORTAR POR WHATSAPP (CORREGIDA)
     # ==========================================
     def exportar_whatsapp(e):
         try:
@@ -106,8 +106,9 @@ def main(page: ft.Page):
 
             reporte = f"📊 *BITÁCORA FINANCIERA*\n💰 Saldo Actual: *${saldo_total:.2f}*\n\n*HISTORIAL DE MOVIMIENTOS:*\n{texto_movimientos}"
             reporte_codificado = urllib.parse.quote(reporte)
-
-            page.launch_url(f"https://wa.me/?text={reporte_codificado}")
+            
+            url_whatsapp = f"https://api.whatsapp.com/send?text={reporte_codificado}"
+            page.launch_url(url_whatsapp)
         except Exception as ex:
             notificar(f"Error al exportar: {ex}", ft.Colors.RED_700)
 
@@ -120,21 +121,18 @@ def main(page: ft.Page):
         bgcolor=ft.Colors.BLUE_GREY_800,
         elevation=5,
         actions=[
-            # Botón para exportar por WhatsApp
             ft.IconButton(
                 icon=ft.Icons.SHARE,
                 icon_color=ft.Colors.GREEN_400,
                 tooltip="Exportar por WhatsApp",
                 on_click=exportar_whatsapp
             ),
-            # Botón para consultar la tasa en DolarVzla
             ft.IconButton(
                 icon=ft.Icons.CURRENCY_EXCHANGE,
                 icon_color=ft.Colors.BLUE_400,
                 tooltip="Consultar DolarVzla",
                 on_click=abrir_dolar_vzla
             ),
-            # Botón de Acerca de / Sugerencias
             ft.IconButton(
                 icon=ft.Icons.INFO_OUTLINE,
                 icon_color=ft.Colors.ORANGE_400,
@@ -144,7 +142,6 @@ def main(page: ft.Page):
         ]
     )
 
-    # Elemento visual para el Saldo (Fondo Verde)
     texto_saldo = ft.Text("$0.00", size=36, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
     tarjeta_saldo = ft.Container(
         content=ft.Column(
@@ -163,7 +160,6 @@ def main(page: ft.Page):
         shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK_38)
     )
 
-    # Lista donde se mostrarán las operaciones
     lista_movimientos = ft.ListView(expand=True, spacing=5, padding=15)
 
     def cargar_datos():
