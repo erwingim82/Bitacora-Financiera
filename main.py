@@ -48,6 +48,9 @@ def main(page: ft.Page):
         snack.open = True
         page.update()
 
+    def abrir_url_externa(url: str):
+        page.launch_url(url)
+
     # ==========================================
     # 2. DIÁLOGO "ACERCA DE" Y SUGERENCIAS
     # ==========================================
@@ -61,10 +64,10 @@ def main(page: ft.Page):
                     ft.Icon(ft.Icons.EMAIL, color=ft.Colors.BLUE_400), 
                     ft.Text("Enviar Sugerencia / Soporte", color=ft.Colors.BLUE_400)
                 ], alignment=ft.MainAxisAlignment.CENTER, tight=True), 
-                on_click=lambda e: page.launch_url("mailto:myconsultingsca@gmail.com?subject=Sugerencias%20Bitacora%20Financiera")
+                on_click=lambda _: abrir_url_externa("mailto:myconsultingsca@gmail.com?subject=Sugerencias%20Bitacora%20Financiera")
             )
         ], tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-        actions=[ft.TextButton("Cerrar", on_click=lambda e: cerrar_dialogo(dialogo_acerca))]
+        actions=[ft.TextButton("Cerrar", on_click=lambda _: cerrar_dialogo(dialogo_acerca))]
     )
 
     def abrir_dialogo(dialogo):
@@ -78,7 +81,7 @@ def main(page: ft.Page):
         page.update()
 
     # ==========================================
-    # 3. FUNCIONES DE ACCIÓN SUPERIOR (DIÁLOGOS MÓVILES SEGUROS)
+    # 3. FUNCIONES DE ACCIÓN SUPERIOR
     # ==========================================
     def mostrar_opciones_compartir(e):
         try:
@@ -120,7 +123,7 @@ def main(page: ft.Page):
                         icon=ft.Icons.SHARE,
                         color=ft.Colors.WHITE,
                         bgcolor=ft.Colors.GREEN_600,
-                        on_click=lambda _: page.launch_url(url_whatsapp)
+                        on_click=lambda _: abrir_url_externa(url_whatsapp)
                     )
                 ], tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
                 actions=[ft.TextButton("Cerrar", on_click=lambda _: cerrar_dialogo(dialogo_compartir))]
@@ -141,7 +144,7 @@ def main(page: ft.Page):
                     icon=ft.Icons.OPEN_IN_BROWSER,
                     color=ft.Colors.WHITE,
                     bgcolor=ft.Colors.BLUE_600,
-                    on_click=lambda _: page.launch_url("https://www.dolarvzla.com/")
+                    on_click=lambda _: abrir_url_externa("https://www.dolarvzla.com/")
                 )
             ], tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             actions=[ft.TextButton("Cerrar", on_click=lambda _: cerrar_dialogo(dialogo_dolar))]
@@ -173,7 +176,7 @@ def main(page: ft.Page):
                 icon=ft.Icons.INFO_OUTLINE,
                 icon_color=ft.Colors.ORANGE_400,
                 tooltip="Acerca de y Sugerencias",
-                on_click=lambda e: abrir_dialogo(dialogo_acerca)
+                on_click=lambda _: abrir_dialogo(dialogo_acerca)
             )
         ]
     )
@@ -277,7 +280,7 @@ def main(page: ft.Page):
     boton_fecha = ft.OutlinedButton(
         content=texto_fecha_boton,
         icon=ft.Icons.CALENDAR_MONTH,
-        on_click=lambda e: setattr(selector_fecha, "open", True) or selector_fecha.update()
+        on_click=lambda _: setattr(selector_fecha, "open", True) or selector_fecha.update()
     )
 
     def guardar_registro(tipo_operacion):
@@ -312,8 +315,8 @@ def main(page: ft.Page):
         except Exception as ex:
             notificar(f"Error al guardar en BD: {ex}", ft.Colors.RED_700)
 
-    boton_deposito = ft.FilledButton("Depósito", icon=ft.Icons.ADD_CIRCLE, style=ft.ButtonStyle(bgcolor=ft.Colors.GREEN_600), on_click=lambda e: guardar_registro("Depósito"), expand=True)
-    boton_gasto = ft.FilledButton("Gasto", icon=ft.Icons.REMOVE_CIRCLE, style=ft.ButtonStyle(bgcolor=ft.Colors.RED_600), on_click=lambda e: guardar_registro("Gasto"), expand=True)
+    boton_deposito = ft.FilledButton("Depósito", icon=ft.Icons.ADD_CIRCLE, style=ft.ButtonStyle(bgcolor=ft.Colors.GREEN_600), on_click=lambda _: guardar_registro("Depósito"), expand=True)
+    boton_gasto = ft.FilledButton("Gasto", icon=ft.Icons.REMOVE_CIRCLE, style=ft.ButtonStyle(bgcolor=ft.Colors.RED_600), on_click=lambda _: guardar_registro("Gasto"), expand=True)
 
     dialogo_nuevo = ft.AlertDialog(
         title=ft.Text("Nuevo Registro"),
@@ -327,14 +330,14 @@ def main(page: ft.Page):
             ],
             tight=True
         ),
-        actions=[ft.TextButton("Cancelar", on_click=lambda e: cerrar_dialogo(dialogo_nuevo))],
+        actions=[ft.TextButton("Cancelar", on_click=lambda _: cerrar_dialogo(dialogo_nuevo))],
         actions_alignment=ft.MainAxisAlignment.END
     )
 
     page.floating_action_button = ft.FloatingActionButton(
         icon=ft.Icons.ADD,
         bgcolor=ft.Colors.BLUE_500,
-        on_click=lambda e: abrir_dialogo(dialogo_nuevo)
+        on_click=lambda _: abrir_dialogo(dialogo_nuevo)
     )
 
     # ==========================================
