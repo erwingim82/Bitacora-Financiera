@@ -3,7 +3,7 @@ name = "bitacora-financiera"
 version = "1.3.0"
 description = "Aplicación de bitácora financiera personal"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "flet>=1.0.0",
 ]
