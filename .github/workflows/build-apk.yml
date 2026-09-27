@@ -12,6 +12,9 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v4
 
+      - name: Aceptar licencias de Android SDK
+        run: yes | android-sdk-root/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
       - name: Compilar APK con Flet
         uses: flet-dev/flet-build-action@v1
         with:
