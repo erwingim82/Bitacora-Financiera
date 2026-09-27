@@ -241,7 +241,7 @@ def main(page: ft.Page):
         
         def cambiar_fecha(e):
             if selector_fecha.value:
-                boton_fecha.text = selector_fecha.value.strftime("%d/%m/%Y")
+                texto_fecha_boton.value = selector_fecha.value.strftime("%d/%m/%Y")
                 page.update()
 
         selector_fecha = ft.DatePicker(
@@ -250,8 +250,9 @@ def main(page: ft.Page):
             on_change=cambiar_fecha
         )
 
+        texto_fecha_boton = ft.Text(datetime.now().strftime("%d/%m/%Y"))
         boton_fecha = ft.OutlinedButton(
-            text=datetime.now().strftime("%d/%m/%Y"),
+            content=texto_fecha_boton,
             icon=ft.Icons.CALENDAR_MONTH,
             on_click=lambda e: page.open(selector_fecha)
         )
@@ -265,7 +266,7 @@ def main(page: ft.Page):
             except ValueError:
                 return notificar("Monto numérico inválido.", ft.Colors.RED_700)
                 
-            fecha_registro = boton_fecha.text
+            fecha_registro = texto_fecha_boton.value
             concepto = entrada_concepto.value
 
             try:
@@ -281,7 +282,7 @@ def main(page: ft.Page):
                 
                 entrada_monto.value = ""
                 entrada_concepto.value = ""
-                boton_fecha.text = datetime.now().strftime("%d/%m/%Y")
+                texto_fecha_boton.value = datetime.now().strftime("%d/%m/%Y")
                 
                 cargar_datos()
             except Exception as ex:
