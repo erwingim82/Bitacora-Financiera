@@ -2,8 +2,8 @@ name: Build Flet APK
 
 on:
   push:
-    branches: [ "main", "master" ] # o la rama que uses
-    workflow_dispatch:  # <--- Esto añade el botón de ejecución manual
+    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -45,6 +45,3 @@ jobs:
           path: |
             build/apk/**/*.apk
             build/**/*.apk
-        with:
-          name: app-release-apk
-          path: build/apk/app/outputs/flutter-apk/app-release.apk
