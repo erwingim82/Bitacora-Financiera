@@ -12,13 +12,6 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v4
 
-      - name: Aceptar licencias de Android
-        run: |
-          mkdir -p /home/runner/android-sdk/licenses
-          echo "d56f5187479451eabf01fb78af6dfcb137a64640" > /home/runner/android-sdk/licenses/android-sdk-license
-          echo "84831b9409646a918e30573bab4c9c91346d8abd" > /home/runner/android-sdk/licenses/android-sdk-preview-license
-          yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
-
       - name: Compilar APK con Flet
         uses: flet-dev/flet-build-action@v1
         with:
