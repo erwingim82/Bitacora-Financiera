@@ -10,7 +10,7 @@ def main(page: ft.Page):
     page.window_height = 680
     page.title = "Bitácora Financiera"
     page.theme_mode = ft.ThemeMode.DARK
-    page.bgcolor = ft.colors.BLUE_GREY_900
+    page.bgcolor = ft.Colors.BLUE_GREY_900
 
     # ==========================================
     # 1. RUTA NATIVA BLINDADA (PATHLIB)
@@ -45,19 +45,17 @@ def main(page: ft.Page):
         
     inicializar_bd()
 
-    def notificar(mensaje, color=ft.colors.GREEN_700):
-        page.open(ft.SnackBar(ft.Text(mensaje, color=ft.colors.WHITE), bgcolor=color, duration=3000))
+    def notificar(mensaje, color=ft.Colors.GREEN_700):
+        page.open(ft.SnackBar(ft.Text(mensaje, color=ft.Colors.WHITE), bgcolor=color, duration=3000))
 
     # ==========================================
     # 2. ACCIONES SUPERIORES (WHATSAPP Y TASAS INTELIGENTE)
     # ==========================================
     def abrir_dolar_al_dia(e):
         try:
-            # Primero intentamos abrir el esquema personalizado de la app (si está instalada)
-            # O en su defecto, ejecutamos la URL directa de la Play Store proporcionada
             page.launch_url("https://play.google.com/store/search?q=dolar+al+dia&c=apps")
         except Exception:
-            notificar("No se pudo abrir el enlace de búsqueda", ft.colors.RED_700)
+            notificar("No se pudo abrir el enlace de búsqueda", ft.Colors.RED_700)
 
     def mostrar_opciones_compartir(e):
         try:
@@ -96,13 +94,13 @@ def main(page: ft.Page):
             dialogo_compartir = ft.AlertDialog(
                 title=ft.Text("Exportar Reporte", weight=ft.FontWeight.BOLD),
                 content=ft.Column([
-                    ft.Text("Selecciona una opción para enviar tu bitácora por WhatsApp:", size=13, color=ft.colors.WHITE70),
-                    ft.Divider(height=10, color=ft.colors.TRANSPARENT),
+                    ft.Text("Selecciona una opción para enviar tu bitácora por WhatsApp:", size=13, color=ft.Colors.WHITE70),
+                    ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
                     ft.FilledButton(
                         "Enviar por WhatsApp",
-                        icon=ft.icons.SHARE,
-                        color=ft.colors.WHITE,
-                        bgcolor=ft.colors.GREEN_600,
+                        icon=ft.Icons.SHARE,
+                        color=ft.Colors.WHITE,
+                        bgcolor=ft.Colors.GREEN_600,
                         on_click=enviar_wsp
                     )
                 ], tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
@@ -111,7 +109,7 @@ def main(page: ft.Page):
             page.open(dialogo_compartir)
 
         except Exception as ex:
-            notificar(f"Error al generar reporte: {ex}", ft.colors.RED_700)
+            notificar(f"Error al generar reporte: {ex}", ft.Colors.RED_700)
 
     # ==========================================
     # 3. INTERFAZ PRINCIPAL
@@ -123,11 +121,11 @@ def main(page: ft.Page):
             title=ft.Text("Acerca de", weight=ft.FontWeight.BOLD),
             content=ft.Column([
                 ft.Text("Bitácora Financiera\nVersión V1.3\n\nControl de ingresos y egresos personales.", size=14, text_align=ft.TextAlign.CENTER),
-                ft.Divider(height=10, color=ft.colors.TRANSPARENT),
+                ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
                 ft.TextButton(
                     content=ft.Row([
-                        ft.Icon(ft.icons.EMAIL, color=ft.colors.BLUE_400), 
-                        ft.Text("Enviar Sugerencia / Soporte", color=ft.colors.BLUE_400)
+                        ft.Icon(ft.Icons.EMAIL, color=ft.Colors.BLUE_400), 
+                        ft.Text("Enviar Sugerencia / Soporte", color=ft.Colors.BLUE_400)
                     ], alignment=ft.MainAxisAlignment.CENTER, tight=True), 
                     on_click=lambda e: page.launch_url("mailto:myconsultingsca@gmail.com?subject=Sugerencias%20Bitacora%20Financiera")
                 )
@@ -138,46 +136,46 @@ def main(page: ft.Page):
         page.appbar = ft.AppBar(
             title=ft.Text("Mi Bitácora", weight=ft.FontWeight.BOLD),
             center_title=True,
-            bgcolor=ft.colors.BLUE_GREY_800,
+            bgcolor=ft.Colors.BLUE_GREY_800,
             elevation=5,
             actions=[
                 ft.IconButton(
-                    icon=ft.icons.SHARE,
-                    icon_color=ft.colors.GREEN_400,
+                    icon=ft.Icons.SHARE,
+                    icon_color=ft.Colors.GREEN_400,
                     tooltip="Exportar por WhatsApp",
                     on_click=mostrar_opciones_compartir
                 ),
                 ft.IconButton(
-                    icon=ft.icons.CURRENCY_EXCHANGE,
-                    icon_color=ft.colors.BLUE_400,
+                    icon=ft.Icons.CURRENCY_EXCHANGE,
+                    icon_color=ft.Colors.BLUE_400,
                     tooltip="Buscar Dolar al Día",
                     on_click=abrir_dolar_al_dia
                 ),
                 ft.IconButton(
-                    icon=ft.icons.INFO_OUTLINE,
-                    icon_color=ft.colors.ORANGE_400,
+                    icon=ft.Icons.INFO_OUTLINE,
+                    icon_color=ft.Colors.ORANGE_400,
                     tooltip="Acerca de y Sugerencias",
                     on_click=lambda e: page.open(dialogo_acerca)
                 )
             ]
         )
 
-        texto_saldo = ft.Text("$0.00", size=36, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE)
+        texto_saldo = ft.Text("$0.00", size=36, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
         tarjeta_saldo = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("SALDO ACTUAL", size=14, weight=ft.FontWeight.W_500, color=ft.colors.WHITE70),
+                    ft.Text("SALDO ACTUAL", size=14, weight=ft.FontWeight.W_500, color=ft.Colors.WHITE70),
                     texto_saldo
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
             ),
-            bgcolor=ft.colors.GREEN_700,
+            bgcolor=ft.Colors.GREEN_700,
             border_radius=15,
             padding=20,
             margin=15, 
-            alignment=ft.alignment.center,
-            shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.colors.BLACK38)
+            alignment=ft.Alignment.CENTER,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK38)
         )
 
         lista_movimientos = ft.ListView(expand=True, spacing=5, padding=15)
@@ -197,8 +195,8 @@ def main(page: ft.Page):
                     lista_movimientos.controls.append(
                         ft.Container(
                             content=ft.Text("No hay registros todavía.\n¡Presiona el botón + para empezar!", 
-                                            text_align=ft.TextAlign.CENTER, color=ft.colors.WHITE54),
-                            alignment=ft.alignment.center,
+                                            text_align=ft.TextAlign.CENTER, color=ft.Colors.WHITE54),
+                            alignment=ft.Alignment.CENTER,
                             padding=50
                         )
                     )
@@ -206,8 +204,8 @@ def main(page: ft.Page):
                     for mov in movimientos:
                         id_mov, fecha, concepto, monto, tipo = mov
                         es_ingreso = (tipo == "Depósito")
-                        color_icono = ft.colors.GREEN_400 if es_ingreso else ft.colors.RED_400
-                        icono = ft.icons.ARROW_UPWARD if es_ingreso else ft.icons.ARROW_DOWNWARD
+                        color_icono = ft.Colors.GREEN_400 if es_ingreso else ft.Colors.RED_400
+                        icono = ft.Icons.ARROW_UPWARD if es_ingreso else ft.Icons.ARROW_DOWNWARD
                         signo = "+" if es_ingreso else "-"
                         
                         if es_ingreso:
@@ -218,18 +216,18 @@ def main(page: ft.Page):
                         lista_movimientos.controls.append(
                             ft.Card(
                                 elevation=2,
-                                color=ft.colors.BLUE_GREY_800,
+                                color=ft.Colors.BLUE_GREY_800,
                                 content=ft.ListTile(
-                                    leading=ft.CircleAvatar(content=ft.Icon(icono, color=color_icono), bgcolor=ft.colors.BLUE_GREY_900),
+                                    leading=ft.CircleAvatar(content=ft.Icon(icono, color=color_icono), bgcolor=ft.Colors.BLUE_GREY_900),
                                     title=ft.Text(concepto, weight=ft.FontWeight.BOLD),
-                                    subtitle=ft.Text(fecha, size=12, color=ft.colors.WHITE54),
+                                    subtitle=ft.Text(fecha, size=12, color=ft.Colors.WHITE54),
                                     trailing=ft.Text(f"{signo} ${monto:.2f}", color=color_icono, weight=ft.FontWeight.BOLD, size=16)
                                 )
                             )
                         )
                 
                 texto_saldo.value = f"${saldo_total:.2f}"
-                tarjeta_saldo.bgcolor = ft.colors.RED_800 if saldo_total < 0 else ft.colors.GREEN_700
+                tarjeta_saldo.bgcolor = ft.Colors.RED_800 if saldo_total < 0 else ft.Colors.GREEN_700
             except Exception as ex:
                 print(f"Error cargando datos: {ex}")
             
@@ -238,8 +236,8 @@ def main(page: ft.Page):
         # ==========================================
         # 4. DIÁLOGO PARA NUEVO REGISTRO
         # ==========================================
-        entrada_monto = ft.TextField(label="Monto ($)", keyboard_type=ft.KeyboardType.NUMBER, prefix_icon=ft.icons.ATTACH_MONEY, border_color=ft.colors.RED_400)
-        entrada_concepto = ft.TextField(label="Concepto (Ej: Sueldos y salarios)", capitalization=ft.TextCapitalization.SENTENCES, prefix_icon=ft.icons.TEXT_SNIPPET, border_color=ft.colors.RED_400)
+        entrada_monto = ft.TextField(label="Monto ($)", keyboard_type=ft.KeyboardType.NUMBER, prefix_icon=ft.Icons.ATTACH_MONEY, border_color=ft.Colors.RED_400)
+        entrada_concepto = ft.TextField(label="Concepto (Ej: Sueldos y salarios)", capitalization=ft.TextCapitalization.SENTENCES, prefix_icon=ft.Icons.TEXT_SNIPPET, border_color=ft.Colors.RED_400)
         
         def cambiar_fecha(e):
             if selector_fecha.value:
@@ -254,18 +252,18 @@ def main(page: ft.Page):
 
         boton_fecha = ft.OutlinedButton(
             text=datetime.now().strftime("%d/%m/%Y"),
-            icon=ft.icons.CALENDAR_MONTH,
+            icon=ft.Icons.CALENDAR_MONTH,
             on_click=lambda e: page.open(selector_fecha)
         )
 
         def guardar_registro(tipo_operacion):
             if not entrada_monto.value or not entrada_concepto.value:
-                return notificar("Por favor completa el monto y el concepto.", ft.colors.ORANGE_700)
+                return notificar("Por favor completa el monto y el concepto.", ft.Colors.ORANGE_700)
                 
             try:
                 monto = float(entrada_monto.value.replace(",", "."))
             except ValueError:
-                return notificar("Monto numérico inválido.", ft.colors.RED_700)
+                return notificar("Monto numérico inválido.", ft.Colors.RED_700)
                 
             fecha_registro = boton_fecha.text
             concepto = entrada_concepto.value
@@ -279,7 +277,7 @@ def main(page: ft.Page):
                 conexion.close()
                 
                 page.close(dialogo_nuevo)
-                notificar(f"{tipo_operacion} de ${monto:.2f} registrado con éxito.", ft.colors.BLUE_700)
+                notificar(f"{tipo_operacion} de ${monto:.2f} registrado con éxito.", ft.Colors.BLUE_700)
                 
                 entrada_monto.value = ""
                 entrada_concepto.value = ""
@@ -287,10 +285,10 @@ def main(page: ft.Page):
                 
                 cargar_datos()
             except Exception as ex:
-                notificar(f"Error al guardar en BD: {ex}", ft.colors.RED_700)
+                notificar(f"Error al guardar en BD: {ex}", ft.Colors.RED_700)
 
-        boton_deposito = ft.FilledButton("Depósito", icon=ft.icons.ADD_CIRCLE, style=ft.ButtonStyle(bgcolor=ft.colors.GREEN_600, color=ft.colors.WHITE), on_click=lambda e: guardar_registro("Depósito"), expand=True)
-        boton_gasto = ft.FilledButton("Gasto", icon=ft.icons.REMOVE_CIRCLE, style=ft.ButtonStyle(bgcolor=ft.colors.RED_600, color=ft.colors.WHITE), on_click=lambda e: guardar_registro("Gasto"), expand=True)
+        boton_deposito = ft.FilledButton("Depósito", icon=ft.Icons.ADD_CIRCLE, style=ft.ButtonStyle(bgcolor=ft.Colors.GREEN_600, color=ft.Colors.WHITE), on_click=lambda e: guardar_registro("Depósito"), expand=True)
+        boton_gasto = ft.FilledButton("Gasto", icon=ft.Icons.REMOVE_CIRCLE, style=ft.ButtonStyle(bgcolor=ft.Colors.RED_600, color=ft.Colors.WHITE), on_click=lambda e: guardar_registro("Gasto"), expand=True)
 
         dialogo_nuevo = ft.AlertDialog(
             title=ft.Text("Nuevo Registro"),
@@ -299,7 +297,7 @@ def main(page: ft.Page):
                     entrada_concepto,
                     entrada_monto,
                     ft.Row([ft.Text("Fecha:", weight=ft.FontWeight.W_500), boton_fecha], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                    ft.Divider(height=10, color=ft.colors.TRANSPARENT),
+                    ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
                     ft.Row([boton_deposito, boton_gasto], spacing=10)
                 ],
                 tight=True
@@ -309,8 +307,8 @@ def main(page: ft.Page):
         )
 
         page.floating_action_button = ft.FloatingActionButton(
-            icon=ft.icons.ADD,
-            bgcolor=ft.colors.BLUE_500,
+            icon=ft.Icons.ADD,
+            bgcolor=ft.Colors.BLUE_500,
             on_click=lambda e: page.open(dialogo_nuevo)
         )
 
@@ -319,7 +317,7 @@ def main(page: ft.Page):
                 [
                     tarjeta_saldo,
                     ft.Container(
-                        content=ft.Text("HISTORIAL DE MOVIMIENTOS", size=12, weight=ft.FontWeight.BOLD, color=ft.colors.WHITE54),
+                        content=ft.Text("HISTORIAL DE MOVIMIENTOS", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE54),
                         padding=10
                     ),
                     lista_movimientos
@@ -330,7 +328,6 @@ def main(page: ft.Page):
 
         cargar_datos()
 
-    # Iniciar directamente en la interfaz principal ya que es una bitácora personal
     construir_interfaz_principal()
 
 ft.app(target=main)
