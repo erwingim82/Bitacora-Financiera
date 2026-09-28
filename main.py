@@ -3,7 +3,6 @@ import sqlite3
 import os
 from pathlib import Path
 from datetime import datetime
-import urllib.parse
 
 def main(page: ft.Page):
     page.window.width = 380
@@ -78,9 +77,9 @@ def main(page: ft.Page):
         page.update()
 
     # ==========================================
-    # 3. FUNCIONES DE ACCIÓN SUPERIOR (WHATSAPP Y DOLAR)
+    # 3. FUNCIONES DE ACCIÓN SUPERIOR (PORTAPAPELES Y DOLAR)
     # ==========================================
-    def mostrar_opciones_compartir(e):
+    def exportar_portapapeles(e):
         try:
             conexion = sqlite3.connect(DB_NAME)
             cursor = conexion.cursor()
@@ -107,30 +106,22 @@ def main(page: ft.Page):
                 texto_movimientos = "Sin movimientos registrados.\n"
 
             reporte = f"📊 *BITÁCORA FINANCIERA*\n💰 Saldo Actual: *${saldo_total:.2f}*\n\n*HISTORIAL DE MOVIMIENTOS:*\n{texto_movimientos}"
-            reporte_codificado = urllib.parse.quote(reporte)
             
-            # Enlace web universal de WhatsApp compatible al 100% con Android
-            url_whatsapp = f"https://api.whatsapp.com/send?text={reporte_codificado}"
+            # Copiar texto directamente al portapapeles del dispositivo Android de forma nativa
+            page.set_clipboard(reporte)
 
             dialogo_compartir = ft.AlertDialog(
-                title=ft.Text("Exportar Reporte", weight=ft.FontWeight.BOLD),
+                title=ft.Text("¡Reporte Copiado!", weight=ft.FontWeight.BOLD),
                 content=ft.Column([
-                    ft.Text("Selecciona una opción para enviar tu bitácora:", size=13, color=ft.Colors.WHITE_70),
+                    ft.Text("El resumen de tu bitácora se ha copiado al portapapeles.\n\nAbre WhatsApp, ve al chat donde deseas enviarlo y mantén presionado para pegar.", size=13, color=ft.Colors.WHITE_70),
                     ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
-                    ft.ElevatedButton(
-                        "Enviar por WhatsApp",
-                        icon=ft.Icons.SHARE,
-                        color=ft.Colors.WHITE,
-                        bgcolor=ft.Colors.GREEN_600,
-                        on_click=lambda _: page.launch_url(url_whatsapp)
-                    )
                 ], tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-                actions=[ft.TextButton("Cerrar", on_click=lambda _: cerrar_dialogo(dialogo_compartir))]
+                actions=[ft.TextButton("Entendido", on_click=lambda _: cerrar_dialogo(dialogo_compartir))]
             )
             abrir_dialogo(dialogo_compartir)
 
         except Exception as ex:
-            notificar(f"Error al generar reporte: {ex}", ft.Colors.RED_700)
+            notificar(f"Error al exportar: {ex}", ft.Colors.RED_700)
 
     def abrir_dolar_vzla(e):
         dialogo_dolar = ft.AlertDialog(
@@ -162,8 +153,8 @@ def main(page: ft.Page):
             ft.IconButton(
                 icon=ft.Icons.SHARE,
                 icon_color=ft.Colors.GREEN_400,
-                tooltip="Exportar por WhatsApp",
-                on_click=mostrar_opciones_compartir
+                tooltip="Copiar Reporte para WhatsApp",
+                on_click=exportar_portapapeles
             ),
             ft.IconButton(
                 icon=ft.Icons.CURRENCY_EXCHANGE,
