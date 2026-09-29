@@ -33,13 +33,11 @@ def main(page: ft.Page):
     def inicializar_bd():
         conexion = sqlite3.connect(DB_NAME)
         cursor = conexion.cursor()
-        # Tabla para el dueño de la app (solo habrá 1 registro)
         cursor.execute('''CREATE TABLE IF NOT EXISTS perfil (
                             id INTEGER PRIMARY KEY, 
                             nombre TEXT, 
                             telefono TEXT, 
                             correo TEXT)''')
-        # Tabla para los ingresos y gastos
         cursor.execute('''CREATE TABLE IF NOT EXISTS movimientos (
                             id INTEGER PRIMARY KEY AUTOINCREMENT, 
                             fecha TEXT, 
@@ -50,8 +48,12 @@ def main(page: ft.Page):
 
     inicializar_bd()
 
+    # CORRECCIÓN: Método clásico y universal para el SnackBar
     def notificar(mensaje, color=ft.Colors.GREEN_700):
-        page.open(ft.SnackBar(ft.Text(mensaje, color=ft.Colors.WHITE), bgcolor=color, duration=3000))
+        snack = ft.SnackBar(ft.Text(mensaje, color=ft.Colors.WHITE), bgcolor=color, duration=3000)
+        page.overlay.append(snack)
+        snack.open = True
+        page.update()
 
     # ==========================================
     # 3. PANTALLA DE REGISTRO (PRIMERA VEZ)
@@ -75,7 +77,6 @@ def main(page: ft.Page):
                     conexion.commit()
                     conexion.close()
                     notificar("Perfil creado con éxito")
-                    # Pasar a la pantalla principal
                     mostrar_principal((txt_nombre.value, txt_telefono.value, txt_correo.value))
                 except Exception as ex:
                     notificar(f"Error al guardar: {ex}", ft.Colors.RED_700)
@@ -116,7 +117,6 @@ def main(page: ft.Page):
 
         lista_historial = ft.ListView(expand=True, spacing=5)
         
-        # --- Componente Fecha ---
         selector_fecha = ft.DatePicker(on_change=lambda e: actualizar_texto_fecha())
         page.overlay.append(selector_fecha)
         texto_fecha = ft.Text(datetime.now().strftime("%d/%m/%Y"))
@@ -126,13 +126,16 @@ def main(page: ft.Page):
                 texto_fecha.value = selector_fecha.value.strftime("%d/%m/%Y")
                 page.update()
 
-        boton_fecha = ft.OutlinedButton(content=texto_fecha, icon=ft.Icons.CALENDAR_MONTH, on_click=lambda _: page.open(selector_fecha))
+        # CORRECCIÓN: Método clásico para abrir el calendario
+        def abrir_calendario(e):
+            selector_fecha.open = True
+            page.update()
 
-        # --- Entradas ---
+        boton_fecha = ft.OutlinedButton(content=texto_fecha, icon=ft.Icons.CALENDAR_MONTH, on_click=abrir_calendario)
+
         entrada_concepto = ft.TextField(label="Concepto", expand=True)
         entrada_monto = ft.TextField(label="Monto ($)", keyboard_type=ft.KeyboardType.NUMBER, width=110)
 
-        # --- Lógica Base de Datos ---
         def cargar_datos():
             lista_historial.controls.clear()
             conexion = sqlite3.connect(DB_NAME)
@@ -188,7 +191,6 @@ def main(page: ft.Page):
             except ValueError:
                 notificar("Monto inválido", ft.Colors.RED_700)
 
-        # --- Enviar Reporte ---
         def enviar_reporte(e):
             conexion = sqlite3.connect(DB_NAME)
             cursor = conexion.cursor()
@@ -214,7 +216,6 @@ def main(page: ft.Page):
             except Exception:
                 notificar("No se pudo abrir WhatsApp", ft.Colors.RED_700)
 
-        # --- Construcción UI Principal ---
         page.add(
             contenedor_balance,
             ft.Row([boton_fecha], alignment=ft.MainAxisAlignment.CENTER),
