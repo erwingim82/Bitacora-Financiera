@@ -48,7 +48,6 @@ def main(page: ft.Page):
 
     inicializar_bd()
 
-    # CORRECCIÓN: Método clásico y universal para el SnackBar
     def notificar(mensaje, color=ft.Colors.GREEN_700):
         snack = ft.SnackBar(ft.Text(mensaje, color=ft.Colors.WHITE), bgcolor=color, duration=3000)
         page.overlay.append(snack)
@@ -86,7 +85,7 @@ def main(page: ft.Page):
         page.add(
             ft.Icon(ft.Icons.ACCOUNT_CIRCLE, size=80, color=ft.Colors.BLUE_400),
             ft.Text("Bienvenido", size=28, weight=ft.FontWeight.BOLD),
-            ft.Text("Configura tu perfil para los reportes", size=14, color=ft.Colors.WHITE54),
+            ft.Text("Configura tu perfil para los reportes", size=14, color=ft.Colors.WHITE_54),
             ft.Divider(height=20, color=ft.Colors.TRANSPARENT),
             txt_nombre,
             txt_telefono,
@@ -108,7 +107,7 @@ def main(page: ft.Page):
         texto_balance = ft.Text("$0.00", size=45, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
         contenedor_balance = ft.Container(
             content=ft.Column([
-                ft.Text(f"CAPITAL DE {nombre_usuario.upper()}", size=12, color=ft.Colors.WHITE70, weight=ft.FontWeight.BOLD),
+                ft.Text(f"CAPITAL DE {nombre_usuario.upper()}", size=12, color=ft.Colors.WHITE_70, weight=ft.FontWeight.BOLD),
                 texto_balance
             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             alignment=ft.Alignment.CENTER,
@@ -126,7 +125,6 @@ def main(page: ft.Page):
                 texto_fecha.value = selector_fecha.value.strftime("%d/%m/%Y")
                 page.update()
 
-        # CORRECCIÓN: Método clásico para abrir el calendario
         def abrir_calendario(e):
             selector_fecha.open = True
             page.update()
@@ -159,7 +157,7 @@ def main(page: ft.Page):
                     content=ft.ListTile(
                         leading=ft.Icon(icono, color=color_icono),
                         title=ft.Text(concepto, weight=ft.FontWeight.BOLD),
-                        subtitle=ft.Text(fecha, color=ft.Colors.WHITE54, size=12),
+                        subtitle=ft.Text(fecha, color=ft.Colors.WHITE_54, size=12),
                         trailing=ft.Text(f"{signo}${monto:.2f}", color=color_icono, weight=ft.FontWeight.BOLD, size=16)
                     )
                 )
@@ -189,7 +187,7 @@ def main(page: ft.Page):
                 entrada_concepto.value = ""
                 cargar_datos()
             except ValueError:
-                notificar("Monto inválido", ft.Colors.RED_700)
+                notificar("Monto numérico inválido", ft.Colors.RED_700)
 
         def enviar_reporte(e):
             conexion = sqlite3.connect(DB_NAME)
@@ -225,7 +223,7 @@ def main(page: ft.Page):
                 ft.FilledButton("Gasto", icon=ft.Icons.REMOVE, bgcolor=ft.Colors.RED_600, on_click=lambda e: agregar_movimiento(e, "gasto"), expand=True)
             ]),
             ft.Divider(height=15, color=ft.Colors.TRANSPARENT),
-            ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE54, size=12),
+            ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE_54, size=12),
             lista_historial, 
             ft.ElevatedButton(
                 "Enviar mi Reporte por WhatsApp", 
