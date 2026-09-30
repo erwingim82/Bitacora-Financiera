@@ -6,6 +6,9 @@ from datetime import datetime
 import urllib.parse
 
 def main(page: ft.Page):
+    # ==========================================
+    # 1. CONFIGURACIÓN DE LA PÁGINA
+    # ==========================================
     page.window.width = 380
     page.window.height = 680
     page.title = "Mi Balance"
@@ -13,6 +16,9 @@ def main(page: ft.Page):
     page.bgcolor = ft.Colors.BLUE_GREY_900 
     page.padding = 20
 
+    # ==========================================
+    # 2. BASE DE DATOS BLINDADA
+    # ==========================================
     try:
         if page.platform == ft.PagePlatform.ANDROID or page.platform == ft.PagePlatform.IOS:
             directorio_base = Path(page.get_user_data_dir())
@@ -51,13 +57,16 @@ def main(page: ft.Page):
         snack.open = True
         page.update()
 
+    # ==========================================
+    # 3. PANTALLA DE REGISTRO
+    # ==========================================
     def mostrar_registro():
         page.clean()
         page.vertical_alignment = ft.MainAxisAlignment.CENTER
         page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
         txt_nombre = ft.TextField(label="Nombre y Apellido", prefix_icon=ft.Icons.PERSON, width=300)
-        txt_telefono = ft.TextField(label="Nro de Teléfono", keyboard_type=ft.KeyboardType.PHONE, prefix_icon=ft.Icons.PHONE, width=300)
+        txt_telefono = ft.TextField(label="Nro de Teléfono (Ej: +584242153625)", keyboard_type=ft.KeyboardType.PHONE, prefix_icon=ft.Icons.PHONE, width=300)
         txt_correo = ft.TextField(label="Correo Electrónico", keyboard_type=ft.KeyboardType.EMAIL, prefix_icon=ft.Icons.EMAIL, width=300)
 
         def guardar_perfil(e):
@@ -88,6 +97,9 @@ def main(page: ft.Page):
             ft.FilledButton("Guardar y Comenzar", on_click=guardar_perfil, width=300, style=ft.ButtonStyle(bgcolor=ft.Colors.BLUE_600))
         )
 
+    # ==========================================
+    # 4. PANTALLA PRINCIPAL
+    # ==========================================
     def mostrar_principal(datos_usuario):
         page.clean()
         page.vertical_alignment = ft.MainAxisAlignment.START
@@ -188,7 +200,21 @@ def main(page: ft.Page):
             except Exception as e:
                 notificar("Error al guardar", ft.Colors.RED_700)
 
-        def enviar_reporte(e):
+
+        # ==========================================
+        # NUEVA LÓGICA DE REPORTE TIPO "CREDI-PERSONAS"
+        # ==========================================
+        opcion_envio_reporte = ft.Dropdown(
+            label="Enviar Reporte por:", 
+            options=[ft.dropdown.Option("WhatsApp"), ft.dropdown.Option("Correo Electrónico")], 
+            value="WhatsApp", 
+            border_color=ft.Colors.BLUE_400
+        )
+
+        def procesar_envio_reporte(e):
+            dialogo_reporte.open = False
+            page.update()
+            
             try:
                 conexion = sqlite3.connect(DB_NAME)
                 cursor = conexion.cursor()
@@ -207,13 +233,44 @@ def main(page: ft.Page):
                     texto += f"• {m[0]} | {m[1]}: {signo}${m[2]:.2f}\n"
                     
                 texto_codificado = urllib.parse.quote(texto)
-                asunto_codificado = urllib.parse.quote(f"Mi Balance - {nombre_usuario}")
                 
-                enlace_correo = f"https://mail.google.com/mail/?view=cm&fs=1&to={correo_usuario}&su={asunto_codificado}&body={texto_codificado}"
-                page.launch_url(enlace_correo)
+                # Evaluación exacta de Credi-Personas
+                if opcion_envio_reporte.value == "WhatsApp":
+                    tel_limpio = telefono_usuario.replace('+', '').replace(' ', '')
+                    page.launch_url(f"https://wa.me/{tel_limpio}?text={texto_codificado}")
+                elif opcion_envio_reporte.value == "Correo Electrónico":
+                    asunto_codificado = urllib.parse.quote(f"Mi Balance - {nombre_usuario}")
+                    page.launch_url(f"mailto:{correo_usuario}?subject={asunto_codificado}&body={texto_codificado}")
+                    
             except Exception:
-                notificar("Error al intentar abrir el correo", ft.Colors.RED_700)
+                notificar("Error abriendo la aplicación externa", ft.Colors.RED_700)
 
+        dialogo_reporte = ft.AlertDialog(
+            title=ft.Text("Compartir Balance", weight=ft.FontWeight.BOLD), 
+            content=ft.Column([
+                ft.Text("Selecciona el medio para enviar tu estado de cuenta detallado."), 
+                opcion_envio_reporte
+            ], tight=True), 
+            actions=[
+                ft.FilledButton("Compartir", on_click=procesar_envio_reporte, style=ft.ButtonStyle(bgcolor=ft.Colors.BLUE_500, color=ft.Colors.WHITE)), 
+                ft.TextButton("Cancelar", on_click=lambda e: cerrar_dialogo())
+            ], 
+            actions_alignment=ft.MainAxisAlignment.CENTER
+        )
+        
+        page.overlay.append(dialogo_reporte)
+
+        def abrir_dialogo_reporte(e):
+            dialogo_reporte.open = True
+            page.update()
+
+        def cerrar_dialogo():
+            dialogo_reporte.open = False
+            page.update()
+
+        # ==========================================
+        # CONSTRUCCIÓN DE INTERFAZ
+        # ==========================================
         page.add(
             contenedor_balance,
             ft.Row([boton_fecha], alignment=ft.MainAxisAlignment.CENTER),
@@ -226,16 +283,19 @@ def main(page: ft.Page):
             ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400, size=12),
             lista_historial, 
             ft.ElevatedButton(
-                "Enviar mi Reporte por Correo", 
-                icon=ft.Icons.EMAIL, 
-                bgcolor=ft.Colors.BLUE_500, 
+                "Compartir Reporte", 
+                icon=ft.Icons.IOS_SHARE, 
+                bgcolor=ft.Colors.BLUE_600, 
                 color=ft.Colors.WHITE,
-                on_click=enviar_reporte,
+                on_click=abrir_dialogo_reporte,
                 width=float('inf') 
             )
         )
         cargar_datos()
 
+    # ==========================================
+    # 5. CONTROL DE ACCESO
+    # ==========================================
     try:
         conexion = sqlite3.connect(DB_NAME)
         cursor = conexion.cursor()
