@@ -6,9 +6,6 @@ from datetime import datetime
 import urllib.parse
 
 def main(page: ft.Page):
-    # ==========================================
-    # 1. CONFIGURACIÓN DE LA PÁGINA SEGURA
-    # ==========================================
     page.window.width = 380
     page.window.height = 680
     page.title = "Mi Balance"
@@ -16,9 +13,6 @@ def main(page: ft.Page):
     page.bgcolor = ft.Colors.BLUE_GREY_900 
     page.padding = 20
 
-    # ==========================================
-    # 2. BASE DE DATOS BLINDADA (MÓVIL)
-    # ==========================================
     try:
         if page.platform == ft.PagePlatform.ANDROID or page.platform == ft.PagePlatform.IOS:
             directorio_base = Path(page.get_user_data_dir())
@@ -57,16 +51,13 @@ def main(page: ft.Page):
         snack.open = True
         page.update()
 
-    # ==========================================
-    # 3. PANTALLA DE REGISTRO (PRIMERA VEZ)
-    # ==========================================
     def mostrar_registro():
         page.clean()
         page.vertical_alignment = ft.MainAxisAlignment.CENTER
         page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
         txt_nombre = ft.TextField(label="Nombre y Apellido", prefix_icon=ft.Icons.PERSON, width=300)
-        txt_telefono = ft.TextField(label="Nro de Teléfono (Ej: +584242153625)", keyboard_type=ft.KeyboardType.PHONE, prefix_icon=ft.Icons.PHONE, width=300)
+        txt_telefono = ft.TextField(label="Nro de Teléfono", keyboard_type=ft.KeyboardType.PHONE, prefix_icon=ft.Icons.PHONE, width=300)
         txt_correo = ft.TextField(label="Correo Electrónico", keyboard_type=ft.KeyboardType.EMAIL, prefix_icon=ft.Icons.EMAIL, width=300)
 
         def guardar_perfil(e):
@@ -81,7 +72,7 @@ def main(page: ft.Page):
                     notificar("Perfil creado con éxito")
                     mostrar_principal((txt_nombre.value, txt_telefono.value, txt_correo.value))
                 except Exception as ex:
-                    notificar(f"Error al guardar: {ex}", ft.Colors.RED_700)
+                    notificar("Error al guardar", ft.Colors.RED_700)
             else:
                 notificar("Por favor completa todos los campos", ft.Colors.ORANGE_700)
 
@@ -97,9 +88,6 @@ def main(page: ft.Page):
             ft.FilledButton("Guardar y Comenzar", on_click=guardar_perfil, width=300, style=ft.ButtonStyle(bgcolor=ft.Colors.BLUE_600))
         )
 
-    # ==========================================
-    # 4. PANTALLA PRINCIPAL (BALANCE)
-    # ==========================================
     def mostrar_principal(datos_usuario):
         page.clean()
         page.vertical_alignment = ft.MainAxisAlignment.START
@@ -156,7 +144,6 @@ def main(page: ft.Page):
                     color_icono = ft.Colors.GREEN_400 if es_ingreso else ft.Colors.RED_400
                     signo = "+" if es_ingreso else ""
                     
-                    # CORRECCIÓN DE LA TARJETA: Se elimina 'color' de ft.Card y se usa bgcolor en ft.Container
                     tarjeta = ft.Card(
                         content=ft.Container(
                             bgcolor=ft.Colors.BLUE_GREY_800,
@@ -201,7 +188,6 @@ def main(page: ft.Page):
             except Exception as e:
                 notificar("Error al guardar", ft.Colors.RED_700)
 
-        # NUEVA LÓGICA: Enviar por Correo Electrónico
         def enviar_reporte(e):
             try:
                 conexion = sqlite3.connect(DB_NAME)
@@ -215,7 +201,7 @@ def main(page: ft.Page):
                     
                 total = sum(m[2] for m in movs)
                 
-                texto = f"📊 ESTADO DE CUENTA\nPropietario: {nombre_usuario}\nCapital Actual: ${total:.2f}\n\nDetalle de Movimientos:\n"
+                texto = f"📊 *ESTADO DE CUENTA*\n👤 Propietario: {nombre_usuario}\n💰 Capital Actual: *${total:.2f}*\n\n*Detalle de Movimientos:*\n"
                 for m in movs:
                     signo = "+" if m[2] >= 0 else ""
                     texto += f"• {m[0]} | {m[1]}: {signo}${m[2]:.2f}\n"
@@ -223,10 +209,10 @@ def main(page: ft.Page):
                 texto_codificado = urllib.parse.quote(texto)
                 asunto_codificado = urllib.parse.quote(f"Mi Balance - {nombre_usuario}")
                 
-                # Invocación nativa para abrir la app de correo
-                page.launch_url(f"mailto:{correo_usuario}?subject={asunto_codificado}&body={texto_codificado}")
+                enlace_correo = f"https://mail.google.com/mail/?view=cm&fs=1&to={correo_usuario}&su={asunto_codificado}&body={texto_codificado}"
+                page.launch_url(enlace_correo)
             except Exception:
-                notificar("No se pudo abrir el correo", ft.Colors.RED_700)
+                notificar("Error al intentar abrir el correo", ft.Colors.RED_700)
 
         page.add(
             contenedor_balance,
@@ -239,8 +225,6 @@ def main(page: ft.Page):
             ft.Divider(height=15, color=ft.Colors.TRANSPARENT),
             ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400, size=12),
             lista_historial, 
-            
-            # NUEVO BOTÓN: Adaptado para correo
             ft.ElevatedButton(
                 "Enviar mi Reporte por Correo", 
                 icon=ft.Icons.EMAIL, 
@@ -252,9 +236,6 @@ def main(page: ft.Page):
         )
         cargar_datos()
 
-    # ==========================================
-    # 5. CONTROL DE ACCESO INICIAL (PROTEGIDO)
-    # ==========================================
     try:
         conexion = sqlite3.connect(DB_NAME)
         cursor = conexion.cursor()
