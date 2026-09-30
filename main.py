@@ -13,7 +13,7 @@ def main(page: ft.Page):
     page.window.height = 680
     page.title = "Mi Balance"
     page.theme_mode = ft.ThemeMode.DARK
-    page.bgcolor = "blueGrey900"
+    page.bgcolor = "#263238"  # HEX real para evitar fallos de renderizado
     page.padding = 20
 
     # ==========================================
@@ -51,8 +51,8 @@ def main(page: ft.Page):
 
     inicializar_bd()
 
-    def notificar(mensaje, color="green700"):
-        snack = ft.SnackBar(ft.Text(mensaje, color="white"), bgcolor=color, duration=3000)
+    def notificar(mensaje, color="#388E3C"):
+        snack = ft.SnackBar(ft.Text(mensaje, color="#FFFFFF"), bgcolor=color, duration=3000)
         page.overlay.append(snack)
         snack.open = True
         page.update()
@@ -79,22 +79,22 @@ def main(page: ft.Page):
                     conexion.commit()
                     conexion.close()
                     notificar("Perfil creado con éxito")
-                    mostrar_principal() # Carga directa sin depender de parámetros frágiles
+                    mostrar_principal()
                 except Exception as ex:
-                    notificar(f"Error al guardar: {ex}", "red700")
+                    notificar(f"Error al guardar: {ex}", "#D32F2F")
             else:
-                notificar("Por favor completa todos los campos", "orange700")
+                notificar("Por favor completa todos los campos", "#F57C00")
 
         page.add(
-            ft.Icon("account_circle", size=80, color="blue400"),
+            ft.Icon("account_circle", size=80, color="#42A5F5"),
             ft.Text("Bienvenido", size=28, weight=ft.FontWeight.BOLD),
-            ft.Text("Configura tu perfil para los reportes", size=14, color="white54"),
-            ft.Divider(height=20, color="transparent"),
+            ft.Text("Configura tu perfil para los reportes", size=14, color="#8AFFFFFF"),
+            ft.Divider(height=20, color="#00000000"),
             txt_nombre,
             txt_telefono,
             txt_correo,
-            ft.Divider(height=10, color="transparent"),
-            ft.FilledButton("Guardar y Comenzar", on_click=guardar_perfil, width=300, style=ft.ButtonStyle(bgcolor="blue600"))
+            ft.Divider(height=10, color="#00000000"),
+            ft.FilledButton("Guardar y Comenzar", on_click=guardar_perfil, width=300, style=ft.ButtonStyle(bgcolor="#1E88E5"))
         )
 
     # ==========================================
@@ -105,7 +105,7 @@ def main(page: ft.Page):
         page.vertical_alignment = ft.MainAxisAlignment.START
         page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         
-        # Leer datos frescos directamente de la base de datos de forma segura
+        # Lectura segura del perfil
         try:
             conexion = sqlite3.connect(DB_NAME)
             cursor = conexion.cursor()
@@ -116,10 +116,10 @@ def main(page: ft.Page):
         except:
             nombre_usuario, telefono_usuario, correo_usuario = ("Usuario", "", "")
 
-        texto_balance = ft.Text("$0.00", size=45, weight=ft.FontWeight.BOLD, color="white")
+        texto_balance = ft.Text("$0.00", size=45, weight=ft.FontWeight.BOLD, color="#FFFFFF")
         contenedor_balance = ft.Container(
             content=ft.Column([
-                ft.Text(f"CAPITAL DE {nombre_usuario.upper()}", size=12, color="white70", weight=ft.FontWeight.BOLD),
+                ft.Text(f"CAPITAL DE {nombre_usuario.upper()}", size=12, color="#B3FFFFFF", weight=ft.FontWeight.BOLD),
                 texto_balance
             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             alignment=ft.Alignment.CENTER,
@@ -162,7 +162,7 @@ def main(page: ft.Page):
                     
                     es_ingreso = monto >= 0
                     icono = "arrow_upward" if es_ingreso else "arrow_downward"
-                    color_icono = "green400" if es_ingreso else "red400"
+                    color_icono = "#66BB6A" if es_ingreso else "#EF5350"
                     signo = "+" if es_ingreso else ""
                     
                     tarjeta = ft.Card(
@@ -170,21 +170,21 @@ def main(page: ft.Page):
                         content=ft.ListTile(
                             leading=ft.Icon(icono, color=color_icono),
                             title=ft.Text(concepto, weight=ft.FontWeight.BOLD),
-                            subtitle=ft.Text(fecha, color="white54", size=12),
+                            subtitle=ft.Text(fecha, color="#8AFFFFFF", size=12),
                             trailing=ft.Text(f"{signo}${monto:.2f}", color=color_icono, weight=ft.FontWeight.BOLD, size=16)
                         )
                     )
                     lista_historial.controls.append(tarjeta)
 
                 texto_balance.value = f"${total:.2f}"
-                texto_balance.color = "red400" if total < 0 else "green400"
+                texto_balance.color = "#EF5350" if total < 0 else "#66BB6A"
                 page.update()
             except Exception as e:
-                notificar(f"Error cargando historial: {e}", "red700")
+                notificar(f"Error cargando historial: {e}", "#D32F2F")
 
         def agregar_movimiento(e, tipo):
             if not entrada_monto.value or not entrada_concepto.value:
-                return notificar("Llene ambos campos", "orange700")
+                return notificar("Llene ambos campos", "#F57C00")
                 
             try:
                 monto = float(entrada_monto.value.replace(",", "."))
@@ -202,16 +202,16 @@ def main(page: ft.Page):
                 entrada_concepto.value = ""
                 cargar_datos()
             except ValueError:
-                notificar("Monto numérico inválido", "red700")
+                notificar("Monto numérico inválido", "#D32F2F")
             except Exception as e:
-                notificar(f"Error al guardar: {e}", "red700")
+                notificar(f"Error al guardar: {e}", "#D32F2F")
 
-        # Menú desplegable para compartir (Estilo Credi-Personas)
+        # Menú desplegable para compartir reporte
         opcion_envio_reporte = ft.Dropdown(
             label="Enviar Reporte por:", 
             options=[ft.dropdown.Option("WhatsApp"), ft.dropdown.Option("Correo Electrónico")], 
             value="WhatsApp", 
-            border_color="blue400"
+            border_color="#42A5F5"
         )
 
         def procesar_envio_reporte(e):
@@ -231,7 +231,7 @@ def main(page: ft.Page):
                 nom, tlf, corr = perfil_actual if perfil_actual else (nombre_usuario, telefono_usuario, correo_usuario)
                 
                 if not movs:
-                    return notificar("No hay movimientos para compartir", "orange700")
+                    return notificar("No hay movimientos para compartir", "#F57C00")
                     
                 total = sum(m[2] for m in movs)
                 
@@ -244,19 +244,19 @@ def main(page: ft.Page):
                 
                 if opcion_envio_reporte.value == "WhatsApp":
                     if not tlf:
-                        return notificar("No hay número de teléfono registrado", "orange700")
+                        return notificar("No hay número de teléfono registrado", "#F57C00")
                     tel_limpio = tlf.replace('+', '').replace(' ', '')
                     page.launch_url(f"whatsapp://send?phone={tel_limpio}&text={texto_codificado}")
                     
                 elif opcion_envio_reporte.value == "Correo Electrónico":
                     if not corr:
-                        return notificar("No hay correo registrado", "orange700")
+                        return notificar("No hay correo registrado", "#F57C00")
                     asunto_codificado = urllib.parse.quote(f"Mi Balance - {nom}")
                     enlace_correo = f"https://mail.google.com/mail/?view=cm&fs=1&to={corr}&su={asunto_codificado}&body={texto_codificado}"
                     page.launch_url(enlace_correo)
                     
             except Exception:
-                notificar("Error al procesar reporte", "red700")
+                notificar("Error al procesar reporte", "#D32F2F")
 
         dialogo_reporte = ft.AlertDialog(
             title=ft.Text("Compartir Balance", weight=ft.FontWeight.BOLD), 
@@ -265,7 +265,7 @@ def main(page: ft.Page):
                 opcion_envio_reporte
             ], tight=True), 
             actions=[
-                ft.FilledButton("Compartir", on_click=procesar_envio_reporte, style=ft.ButtonStyle(bgcolor="blue500", color="white")), 
+                ft.FilledButton("Compartir", on_click=procesar_envio_reporte, style=ft.ButtonStyle(bgcolor="#1E88E5", color="#FFFFFF")), 
                 ft.TextButton("Cancelar", on_click=lambda e: cerrar_dialogo())
             ], 
             actions_alignment=ft.MainAxisAlignment.CENTER
@@ -286,17 +286,17 @@ def main(page: ft.Page):
             ft.Row([boton_fecha], alignment=ft.MainAxisAlignment.CENTER),
             ft.Row([entrada_concepto, entrada_monto]),
             ft.Row([
-                ft.FilledButton("Ingreso", icon="add", style=ft.ButtonStyle(bgcolor="green600"), on_click=lambda e: agregar_movimiento(e, "ingreso"), expand=True),
-                ft.FilledButton("Gasto", icon="remove", style=ft.ButtonStyle(bgcolor="red600"), on_click=lambda e: agregar_movimiento(e, "gasto"), expand=True)
+                ft.FilledButton("Ingreso", icon="add", style=ft.ButtonStyle(bgcolor="#43A047"), on_click=lambda e: agregar_movimiento(e, "ingreso"), expand=True),
+                ft.FilledButton("Gasto", icon="remove", style=ft.ButtonStyle(bgcolor="#E53935"), on_click=lambda e: agregar_movimiento(e, "gasto"), expand=True)
             ]),
-            ft.Divider(height=15, color="transparent"),
-            ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color="white54", size=12),
+            ft.Divider(height=15, color="#00000000"),
+            ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color="#8AFFFFFF", size=12),
             lista_historial, 
             ft.ElevatedButton(
                 "Compartir Reporte", 
                 icon="share", 
-                bgcolor="blue600", 
-                color="white",
+                bgcolor="#1E88E5", 
+                color="#FFFFFF",
                 on_click=abrir_dialogo_reporte,
                 width=float('inf') 
             )
@@ -304,7 +304,7 @@ def main(page: ft.Page):
         cargar_datos()
 
     # ==========================================
-    # 5. CONTROL DE ACCESO INICIAL
+    # 5. CONTROL DE ACCESO INICIAL BLINDADO
     # ==========================================
     try:
         conexion = sqlite3.connect(DB_NAME)
