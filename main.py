@@ -234,13 +234,15 @@ def main(page: ft.Page):
                     
                 texto_codificado = urllib.parse.quote(texto)
                 
-                # Evaluación exacta de Credi-Personas
                 if opcion_envio_reporte.value == "WhatsApp":
                     tel_limpio = telefono_usuario.replace('+', '').replace(' ', '')
-                    page.launch_url(f"https://wa.me/{tel_limpio}?text={texto_codificado}")
+                    # Enlace nativo forzado para Android
+                    page.launch_url(f"whatsapp://send?phone={tel_limpio}&text={texto_codificado}")
                 elif opcion_envio_reporte.value == "Correo Electrónico":
                     asunto_codificado = urllib.parse.quote(f"Mi Balance - {nombre_usuario}")
-                    page.launch_url(f"mailto:{correo_usuario}?subject={asunto_codificado}&body={texto_codificado}")
+                    # Enlace web universal autorizado por Android
+                    enlace_correo = f"https://mail.google.com/mail/?view=cm&fs=1&to={correo_usuario}&su={asunto_codificado}&body={texto_codificado}"
+                    page.launch_url(enlace_correo)
                     
             except Exception:
                 notificar("Error abriendo la aplicación externa", ft.Colors.RED_700)
