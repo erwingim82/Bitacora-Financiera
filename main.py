@@ -7,7 +7,7 @@ import urllib.parse
 
 def main(page: ft.Page):
     # ==========================================
-    # 1. CONFIGURACIÓN DE LA PÁGINA
+    # 1. CONFIGURACIÓN DE LA PÁGINA SEGURA
     # ==========================================
     page.window.width = 380
     page.window.height = 680
@@ -156,26 +156,26 @@ def main(page: ft.Page):
                     color_icono = ft.Colors.GREEN_400 if es_ingreso else ft.Colors.RED_400
                     signo = "+" if es_ingreso else ""
                     
+                    # CORRECCIÓN DE LA TARJETA: Se elimina 'color' de ft.Card y se usa bgcolor en ft.Container
                     tarjeta = ft.Card(
-    # Se elimina el atributo 'color' de aquí
-    content=ft.Container(
-        bgcolor="blueGrey800", # El color se aplica de forma segura al contenedor
-        border_radius=10,      # Suaviza los bordes para igualar el estilo de la tarjeta
-        content=ft.ListTile(
-            leading=ft.Icon(icono, color=color_icono),
-            title=ft.Text(concepto, weight=ft.FontWeight.BOLD),
-            subtitle=ft.Text(fecha, color="grey400", size=12),
-            trailing=ft.Text(f"{signo}${monto:.2f}", color=color_icono, weight=ft.FontWeight.BOLD, size=16)
-        )
-    )
-)
+                        content=ft.Container(
+                            bgcolor=ft.Colors.BLUE_GREY_800,
+                            border_radius=10,
+                            content=ft.ListTile(
+                                leading=ft.Icon(icono, color=color_icono),
+                                title=ft.Text(concepto, weight=ft.FontWeight.BOLD),
+                                subtitle=ft.Text(fecha, color=ft.Colors.GREY_400, size=12),
+                                trailing=ft.Text(f"{signo}${monto:.2f}", color=color_icono, weight=ft.FontWeight.BOLD, size=16)
+                            )
+                        )
+                    )
                     lista_historial.controls.append(tarjeta)
 
                 texto_balance.value = f"${total:.2f}"
                 texto_balance.color = ft.Colors.RED_400 if total < 0 else ft.Colors.GREEN_400
                 page.update()
             except Exception as e:
-                notificar(f"Error cargando historial: {e}", ft.Colors.RED_700)
+                notificar("Error cargando historial", ft.Colors.RED_700)
 
         def agregar_movimiento(e, tipo):
             if not entrada_monto.value or not entrada_concepto.value:
@@ -199,8 +199,9 @@ def main(page: ft.Page):
             except ValueError:
                 notificar("Monto numérico inválido", ft.Colors.RED_700)
             except Exception as e:
-                notificar(f"Error al guardar: {e}", ft.Colors.RED_700)
+                notificar("Error al guardar", ft.Colors.RED_700)
 
+        # NUEVA LÓGICA: Enviar por Correo Electrónico
         def enviar_reporte(e):
             try:
                 conexion = sqlite3.connect(DB_NAME)
@@ -214,17 +215,18 @@ def main(page: ft.Page):
                     
                 total = sum(m[2] for m in movs)
                 
-                texto = f"📊 *ESTADO DE CUENTA*\n👤 Propietario: {nombre_usuario}\n✉️ Correo: {correo_usuario}\n💰 Capital Actual: *${total:.2f}*\n\n*Detalle de Movimientos:*\n"
+                texto = f"📊 ESTADO DE CUENTA\nPropietario: {nombre_usuario}\nCapital Actual: ${total:.2f}\n\nDetalle de Movimientos:\n"
                 for m in movs:
                     signo = "+" if m[2] >= 0 else ""
                     texto += f"• {m[0]} | {m[1]}: {signo}${m[2]:.2f}\n"
                     
                 texto_codificado = urllib.parse.quote(texto)
-                tel_limpio = telefono_usuario.replace('+', '').replace(' ', '')
+                asunto_codificado = urllib.parse.quote(f"Mi Balance - {nombre_usuario}")
                 
-                page.launch_url(f"whatsapp://send?phone={tel_limpio}&text={texto_codificado}")
-            except Exception as e:
-                notificar(f"Error abriendo WhatsApp", ft.Colors.RED_700)
+                # Invocación nativa para abrir la app de correo
+                page.launch_url(f"mailto:{correo_usuario}?subject={asunto_codificado}&body={texto_codificado}")
+            except Exception:
+                notificar("No se pudo abrir el correo", ft.Colors.RED_700)
 
         page.add(
             contenedor_balance,
@@ -237,10 +239,12 @@ def main(page: ft.Page):
             ft.Divider(height=15, color=ft.Colors.TRANSPARENT),
             ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400, size=12),
             lista_historial, 
+            
+            # NUEVO BOTÓN: Adaptado para correo
             ft.ElevatedButton(
-                "Enviar mi Reporte por WhatsApp", 
-                icon=ft.Icons.SHARE, 
-                bgcolor=ft.Colors.GREEN_500, 
+                "Enviar mi Reporte por Correo", 
+                icon=ft.Icons.EMAIL, 
+                bgcolor=ft.Colors.BLUE_500, 
                 color=ft.Colors.WHITE,
                 on_click=enviar_reporte,
                 width=float('inf') 
@@ -249,7 +253,7 @@ def main(page: ft.Page):
         cargar_datos()
 
     # ==========================================
-    # 5. CONTROL DE ACCESO INICIAL
+    # 5. CONTROL DE ACCESO INICIAL (PROTEGIDO)
     # ==========================================
     try:
         conexion = sqlite3.connect(DB_NAME)
