@@ -13,7 +13,7 @@ def main(page: ft.Page):
     page.window.height = 680
     page.title = "Mi Balance"
     page.theme_mode = ft.ThemeMode.DARK
-    page.bgcolor = "blueGrey900" 
+    page.bgcolor = "blueGrey900"
     page.padding = 20
 
     # ==========================================
@@ -79,7 +79,7 @@ def main(page: ft.Page):
                     conexion.commit()
                     conexion.close()
                     notificar("Perfil creado con éxito")
-                    mostrar_principal()
+                    mostrar_principal() # Carga directa sin depender de parámetros frágiles
                 except Exception as ex:
                     notificar(f"Error al guardar: {ex}", "red700")
             else:
@@ -88,7 +88,7 @@ def main(page: ft.Page):
         page.add(
             ft.Icon("account_circle", size=80, color="blue400"),
             ft.Text("Bienvenido", size=28, weight=ft.FontWeight.BOLD),
-            ft.Text("Configura tu perfil para los reportes", size=14, color="grey400"),
+            ft.Text("Configura tu perfil para los reportes", size=14, color="white54"),
             ft.Divider(height=20, color="transparent"),
             txt_nombre,
             txt_telefono,
@@ -105,7 +105,7 @@ def main(page: ft.Page):
         page.vertical_alignment = ft.MainAxisAlignment.START
         page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         
-        # Consultar perfil directamente de la BD para asegurar que nunca falle
+        # Leer datos frescos directamente de la base de datos de forma segura
         try:
             conexion = sqlite3.connect(DB_NAME)
             cursor = conexion.cursor()
@@ -119,7 +119,7 @@ def main(page: ft.Page):
         texto_balance = ft.Text("$0.00", size=45, weight=ft.FontWeight.BOLD, color="white")
         contenedor_balance = ft.Container(
             content=ft.Column([
-                ft.Text(f"CAPITAL DE {nombre_usuario.upper()}", size=12, color="grey400", weight=ft.FontWeight.BOLD),
+                ft.Text(f"CAPITAL DE {nombre_usuario.upper()}", size=12, color="white70", weight=ft.FontWeight.BOLD),
                 texto_balance
             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             alignment=ft.Alignment.CENTER,
@@ -166,11 +166,11 @@ def main(page: ft.Page):
                     signo = "+" if es_ingreso else ""
                     
                     tarjeta = ft.Card(
-                        color="blueGrey800", 
+                        color="#37474F", 
                         content=ft.ListTile(
                             leading=ft.Icon(icono, color=color_icono),
                             title=ft.Text(concepto, weight=ft.FontWeight.BOLD),
-                            subtitle=ft.Text(fecha, color="grey400", size=12),
+                            subtitle=ft.Text(fecha, color="white54", size=12),
                             trailing=ft.Text(f"{signo}${monto:.2f}", color=color_icono, weight=ft.FontWeight.BOLD, size=16)
                         )
                     )
@@ -206,7 +206,7 @@ def main(page: ft.Page):
             except Exception as e:
                 notificar(f"Error al guardar: {e}", "red700")
 
-        # Menú desplegable estilo Credi-Personas
+        # Menú desplegable para compartir (Estilo Credi-Personas)
         opcion_envio_reporte = ft.Dropdown(
             label="Enviar Reporte por:", 
             options=[ft.dropdown.Option("WhatsApp"), ft.dropdown.Option("Correo Electrónico")], 
@@ -221,7 +221,6 @@ def main(page: ft.Page):
             try:
                 conexion = sqlite3.connect(DB_NAME)
                 cursor = conexion.cursor()
-                # Volvemos a leer el perfil fresco de la BD
                 cursor.execute("SELECT nombre, telefono, correo FROM perfil LIMIT 1")
                 perfil_actual = cursor.fetchone()
                 
@@ -229,10 +228,7 @@ def main(page: ft.Page):
                 movs = cursor.fetchall()
                 conexion.close()
                 
-                if perfil_actual:
-                    nom, tlf, corr = perfil_actual
-                else:
-                    nom, tlf, corr = nombre_usuario, telefono_usuario, correo_usuario
+                nom, tlf, corr = perfil_actual if perfil_actual else (nombre_usuario, telefono_usuario, correo_usuario)
                 
                 if not movs:
                     return notificar("No hay movimientos para compartir", "orange700")
@@ -259,8 +255,8 @@ def main(page: ft.Page):
                     enlace_correo = f"https://mail.google.com/mail/?view=cm&fs=1&to={corr}&su={asunto_codificado}&body={texto_codificado}"
                     page.launch_url(enlace_correo)
                     
-            except Exception as ex:
-                notificar(f"Error al procesar reporte", "red700")
+            except Exception:
+                notificar("Error al procesar reporte", "red700")
 
         dialogo_reporte = ft.AlertDialog(
             title=ft.Text("Compartir Balance", weight=ft.FontWeight.BOLD), 
@@ -294,7 +290,7 @@ def main(page: ft.Page):
                 ft.FilledButton("Gasto", icon="remove", style=ft.ButtonStyle(bgcolor="red600"), on_click=lambda e: agregar_movimiento(e, "gasto"), expand=True)
             ]),
             ft.Divider(height=15, color="transparent"),
-            ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color="grey400", size=12),
+            ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color="white54", size=12),
             lista_historial, 
             ft.ElevatedButton(
                 "Compartir Reporte", 
