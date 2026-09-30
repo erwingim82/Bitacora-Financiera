@@ -157,14 +157,18 @@ def main(page: ft.Page):
                     signo = "+" if es_ingreso else ""
                     
                     tarjeta = ft.Card(
-                        color=ft.Colors.BLUE_GREY_800, 
-                        content=ft.ListTile(
-                            leading=ft.Icon(icono, color=color_icono),
-                            title=ft.Text(concepto, weight=ft.FontWeight.BOLD),
-                            subtitle=ft.Text(fecha, color=ft.Colors.GREY_400, size=12),
-                            trailing=ft.Text(f"{signo}${monto:.2f}", color=color_icono, weight=ft.FontWeight.BOLD, size=16)
-                        )
-                    )
+    # Se elimina el atributo 'color' de aquí
+    content=ft.Container(
+        bgcolor="blueGrey800", # El color se aplica de forma segura al contenedor
+        border_radius=10,      # Suaviza los bordes para igualar el estilo de la tarjeta
+        content=ft.ListTile(
+            leading=ft.Icon(icono, color=color_icono),
+            title=ft.Text(concepto, weight=ft.FontWeight.BOLD),
+            subtitle=ft.Text(fecha, color="grey400", size=12),
+            trailing=ft.Text(f"{signo}${monto:.2f}", color=color_icono, weight=ft.FontWeight.BOLD, size=16)
+        )
+    )
+)
                     lista_historial.controls.append(tarjeta)
 
                 texto_balance.value = f"${total:.2f}"
