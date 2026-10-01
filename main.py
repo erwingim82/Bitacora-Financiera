@@ -13,7 +13,7 @@ def main(page: ft.Page):
     page.window.height = 680
     page.title = "Mi Balance"
     page.theme_mode = ft.ThemeMode.DARK
-    page.bgcolor = "#263238"  # HEX real para evitar fallos de renderizado
+    page.bgcolor = "blueGrey900"
     page.padding = 20
 
     # ==========================================
@@ -51,8 +51,8 @@ def main(page: ft.Page):
 
     inicializar_bd()
 
-    def notificar(mensaje, color="#388E3C"):
-        snack = ft.SnackBar(ft.Text(mensaje, color="#FFFFFF"), bgcolor=color, duration=3000)
+    def notificar(mensaje, color="green700"):
+        snack = ft.SnackBar(ft.Text(mensaje, color="white"), bgcolor=color, duration=3000)
         page.overlay.append(snack)
         snack.open = True
         page.update()
@@ -79,47 +79,38 @@ def main(page: ft.Page):
                     conexion.commit()
                     conexion.close()
                     notificar("Perfil creado con éxito")
-                    mostrar_principal()
+                    mostrar_principal((txt_nombre.value, txt_telefono.value, txt_correo.value))
                 except Exception as ex:
-                    notificar(f"Error al guardar: {ex}", "#D32F2F")
+                    notificar(f"Error al guardar: {ex}", "red700")
             else:
-                notificar("Por favor completa todos los campos", "#F57C00")
+                notificar("Por favor completa todos los campos", "orange700")
 
         page.add(
-            ft.Icon("account_circle", size=80, color="#42A5F5"),
+            ft.Icon("account_circle", size=80, color="blue400"),
             ft.Text("Bienvenido", size=28, weight=ft.FontWeight.BOLD),
-            ft.Text("Configura tu perfil para los reportes", size=14, color="#8AFFFFFF"),
-            ft.Divider(height=20, color="#00000000"),
+            ft.Text("Configura tu perfil para los reportes", size=14, color="grey400"),
+            ft.Divider(height=20, color="transparent"),
             txt_nombre,
             txt_telefono,
             txt_correo,
-            ft.Divider(height=10, color="#00000000"),
-            ft.FilledButton("Guardar y Comenzar", on_click=guardar_perfil, width=300, style=ft.ButtonStyle(bgcolor="#1E88E5"))
+            ft.Divider(height=10, color="transparent"),
+            ft.FilledButton("Guardar y Comenzar", on_click=guardar_perfil, width=300, style=ft.ButtonStyle(bgcolor="blue600"))
         )
 
     # ==========================================
     # 4. PANTALLA PRINCIPAL (BALANCE)
     # ==========================================
-    def mostrar_principal():
+    def mostrar_principal(datos_usuario):
         page.clean()
         page.vertical_alignment = ft.MainAxisAlignment.START
         page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         
-        # Lectura segura del perfil
-        try:
-            conexion = sqlite3.connect(DB_NAME)
-            cursor = conexion.cursor()
-            cursor.execute("SELECT nombre, telefono, correo FROM perfil LIMIT 1")
-            perfil = cursor.fetchone()
-            conexion.close()
-            nombre_usuario, telefono_usuario, correo_usuario = perfil if perfil else ("Usuario", "", "")
-        except:
-            nombre_usuario, telefono_usuario, correo_usuario = ("Usuario", "", "")
+        nombre_usuario, telefono_usuario, correo_usuario = datos_usuario
 
-        texto_balance = ft.Text("$0.00", size=45, weight=ft.FontWeight.BOLD, color="#FFFFFF")
+        texto_balance = ft.Text("$0.00", size=45, weight=ft.FontWeight.BOLD, color="white")
         contenedor_balance = ft.Container(
             content=ft.Column([
-                ft.Text(f"CAPITAL DE {nombre_usuario.upper()}", size=12, color="#B3FFFFFF", weight=ft.FontWeight.BOLD),
+                ft.Text(f"CAPITAL DE {nombre_usuario.upper()}", size=12, color="grey400", weight=ft.FontWeight.BOLD),
                 texto_balance
             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             alignment=ft.Alignment.CENTER,
@@ -162,29 +153,29 @@ def main(page: ft.Page):
                     
                     es_ingreso = monto >= 0
                     icono = "arrow_upward" if es_ingreso else "arrow_downward"
-                    color_icono = "#66BB6A" if es_ingreso else "#EF5350"
+                    color_icono = "green400" if es_ingreso else "red400"
                     signo = "+" if es_ingreso else ""
                     
                     tarjeta = ft.Card(
-                        color="#37474F", 
+                        color="blueGrey800", 
                         content=ft.ListTile(
                             leading=ft.Icon(icono, color=color_icono),
                             title=ft.Text(concepto, weight=ft.FontWeight.BOLD),
-                            subtitle=ft.Text(fecha, color="#8AFFFFFF", size=12),
+                            subtitle=ft.Text(fecha, color="grey400", size=12),
                             trailing=ft.Text(f"{signo}${monto:.2f}", color=color_icono, weight=ft.FontWeight.BOLD, size=16)
                         )
                     )
                     lista_historial.controls.append(tarjeta)
 
                 texto_balance.value = f"${total:.2f}"
-                texto_balance.color = "#EF5350" if total < 0 else "#66BB6A"
+                texto_balance.color = "red400" if total < 0 else "green400"
                 page.update()
             except Exception as e:
-                notificar(f"Error cargando historial: {e}", "#D32F2F")
+                notificar(f"Error cargando historial: {e}", "red700")
 
         def agregar_movimiento(e, tipo):
             if not entrada_monto.value or not entrada_concepto.value:
-                return notificar("Llene ambos campos", "#F57C00")
+                return notificar("Llene ambos campos", "orange700")
                 
             try:
                 monto = float(entrada_monto.value.replace(",", "."))
@@ -202,16 +193,16 @@ def main(page: ft.Page):
                 entrada_concepto.value = ""
                 cargar_datos()
             except ValueError:
-                notificar("Monto numérico inválido", "#D32F2F")
+                notificar("Monto numérico inválido", "red700")
             except Exception as e:
-                notificar(f"Error al guardar: {e}", "#D32F2F")
+                notificar(f"Error al guardar: {e}", "red700")
 
-        # Menú desplegable para compartir reporte
+        # Menú desplegable para compartir reporte (Estilo Credi-Personas)
         opcion_envio_reporte = ft.Dropdown(
             label="Enviar Reporte por:", 
             options=[ft.dropdown.Option("WhatsApp"), ft.dropdown.Option("Correo Electrónico")], 
             value="WhatsApp", 
-            border_color="#42A5F5"
+            border_color="blue400"
         )
 
         def procesar_envio_reporte(e):
@@ -221,21 +212,16 @@ def main(page: ft.Page):
             try:
                 conexion = sqlite3.connect(DB_NAME)
                 cursor = conexion.cursor()
-                cursor.execute("SELECT nombre, telefono, correo FROM perfil LIMIT 1")
-                perfil_actual = cursor.fetchone()
-                
                 cursor.execute("SELECT fecha, concepto, monto FROM movimientos ORDER BY id ASC")
                 movs = cursor.fetchall()
                 conexion.close()
                 
-                nom, tlf, corr = perfil_actual if perfil_actual else (nombre_usuario, telefono_usuario, correo_usuario)
-                
                 if not movs:
-                    return notificar("No hay movimientos para compartir", "#F57C00")
+                    return notificar("No hay movimientos para compartir", "orange700")
                     
                 total = sum(m[2] for m in movs)
                 
-                texto = f"📊 *ESTADO DE CUENTA*\n👤 Propietario: {nom}\n💰 Capital Actual: *${total:.2f}*\n\n*Detalle de Movimientos:*\n"
+                texto = f"📊 *ESTADO DE CUENTA*\n👤 Propietario: {nombre_usuario}\n✉️ Correo: {correo_usuario}\n💰 Capital Actual: *${total:.2f}*\n\n*Detalle de Movimientos:*\n"
                 for m in movs:
                     signo = "+" if m[2] >= 0 else ""
                     texto += f"• {m[0]} | {m[1]}: {signo}${m[2]:.2f}\n"
@@ -243,20 +229,15 @@ def main(page: ft.Page):
                 texto_codificado = urllib.parse.quote(texto)
                 
                 if opcion_envio_reporte.value == "WhatsApp":
-                    if not tlf:
-                        return notificar("No hay número de teléfono registrado", "#F57C00")
-                    tel_limpio = tlf.replace('+', '').replace(' ', '')
+                    tel_limpio = telefono_usuario.replace('+', '').replace(' ', '')
                     page.launch_url(f"whatsapp://send?phone={tel_limpio}&text={texto_codificado}")
-                    
                 elif opcion_envio_reporte.value == "Correo Electrónico":
-                    if not corr:
-                        return notificar("No hay correo registrado", "#F57C00")
-                    asunto_codificado = urllib.parse.quote(f"Mi Balance - {nom}")
-                    enlace_correo = f"https://mail.google.com/mail/?view=cm&fs=1&to={corr}&su={asunto_codificado}&body={texto_codificado}"
+                    asunto_codificado = urllib.parse.quote(f"Mi Balance - {nombre_usuario}")
+                    enlace_correo = f"https://mail.google.com/mail/?view=cm&fs=1&to={correo_usuario}&su={asunto_codificado}&body={texto_codificado}"
                     page.launch_url(enlace_correo)
                     
             except Exception:
-                notificar("Error al procesar reporte", "#D32F2F")
+                notificar("Error al procesar reporte", "red700")
 
         dialogo_reporte = ft.AlertDialog(
             title=ft.Text("Compartir Balance", weight=ft.FontWeight.BOLD), 
@@ -265,7 +246,7 @@ def main(page: ft.Page):
                 opcion_envio_reporte
             ], tight=True), 
             actions=[
-                ft.FilledButton("Compartir", on_click=procesar_envio_reporte, style=ft.ButtonStyle(bgcolor="#1E88E5", color="#FFFFFF")), 
+                ft.FilledButton("Compartir", on_click=procesar_envio_reporte, style=ft.ButtonStyle(bgcolor="blue500", color="white")), 
                 ft.TextButton("Cancelar", on_click=lambda e: cerrar_dialogo())
             ], 
             actions_alignment=ft.MainAxisAlignment.CENTER
@@ -286,17 +267,17 @@ def main(page: ft.Page):
             ft.Row([boton_fecha], alignment=ft.MainAxisAlignment.CENTER),
             ft.Row([entrada_concepto, entrada_monto]),
             ft.Row([
-                ft.FilledButton("Ingreso", icon="add", style=ft.ButtonStyle(bgcolor="#43A047"), on_click=lambda e: agregar_movimiento(e, "ingreso"), expand=True),
-                ft.FilledButton("Gasto", icon="remove", style=ft.ButtonStyle(bgcolor="#E53935"), on_click=lambda e: agregar_movimiento(e, "gasto"), expand=True)
+                ft.FilledButton("Ingreso", icon="add", style=ft.ButtonStyle(bgcolor="green600"), on_click=lambda e: agregar_movimiento(e, "ingreso"), expand=True),
+                ft.FilledButton("Gasto", icon="remove", style=ft.ButtonStyle(bgcolor="red600"), on_click=lambda e: agregar_movimiento(e, "gasto"), expand=True)
             ]),
-            ft.Divider(height=15, color="#00000000"),
-            ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color="#8AFFFFFF", size=12),
+            ft.Divider(height=15, color="transparent"),
+            ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color="grey400", size=12),
             lista_historial, 
             ft.ElevatedButton(
                 "Compartir Reporte", 
                 icon="share", 
-                bgcolor="#1E88E5", 
-                color="#FFFFFF",
+                bgcolor="blue600", 
+                color="white",
                 on_click=abrir_dialogo_reporte,
                 width=float('inf') 
             )
@@ -309,15 +290,16 @@ def main(page: ft.Page):
     try:
         conexion = sqlite3.connect(DB_NAME)
         cursor = conexion.cursor()
-        cursor.execute("SELECT id FROM perfil LIMIT 1")
+        cursor.execute("SELECT nombre, telefono, correo FROM perfil LIMIT 1")
         usuario_existente = cursor.fetchone()
         conexion.close()
 
         if usuario_existente:
-            mostrar_principal()
+            mostrar_principal(usuario_existente)
         else:
             mostrar_registro()
     except Exception as e:
+        # Atrapa cualquier fallo en el arranque y fuerza el registro para que nunca quede en blanco
         mostrar_registro()
 
 ft.app(target=main)
