@@ -36,6 +36,8 @@ jobs:
 
       - name: Build APK with Flet
         run: |
+          rm -rf build/
+          rm -rf ~/.flet/
           flet build apk --yes --verbose --output build/apk --python-version 3.12 --build-number ${{ github.run_number }}
 
       - name: Upload APK Artifact
