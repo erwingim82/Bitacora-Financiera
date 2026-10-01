@@ -13,7 +13,7 @@ def main(page: ft.Page):
     page.window.height = 680
     page.title = "Mi Balance"
     page.theme_mode = ft.ThemeMode.DARK
-    page.bgcolor = "blueGrey900"
+    page.bgcolor = "blueGrey900" 
     page.padding = 20
 
     # ==========================================
@@ -197,18 +197,7 @@ def main(page: ft.Page):
             except Exception as e:
                 notificar(f"Error al guardar: {e}", "red700")
 
-        # Menú desplegable para compartir reporte (Estilo Credi-Personas)
-        opcion_envio_reporte = ft.Dropdown(
-            label="Enviar Reporte por:", 
-            options=[ft.dropdown.Option("WhatsApp"), ft.dropdown.Option("Correo Electrónico")], 
-            value="WhatsApp", 
-            border_color="blue400"
-        )
-
-        def procesar_envio_reporte(e):
-            dialogo_reporte.open = False
-            page.update()
-            
+        def enviar_reporte(e):
             try:
                 conexion = sqlite3.connect(DB_NAME)
                 cursor = conexion.cursor()
@@ -227,40 +216,12 @@ def main(page: ft.Page):
                     texto += f"• {m[0]} | {m[1]}: {signo}${m[2]:.2f}\n"
                     
                 texto_codificado = urllib.parse.quote(texto)
+                tel_limpio = telefono_usuario.replace('+', '').replace(' ', '')
                 
-                if opcion_envio_reporte.value == "WhatsApp":
-                    tel_limpio = telefono_usuario.replace('+', '').replace(' ', '')
-                    page.launch_url(f"whatsapp://send?phone={tel_limpio}&text={texto_codificado}")
-                elif opcion_envio_reporte.value == "Correo Electrónico":
-                    asunto_codificado = urllib.parse.quote(f"Mi Balance - {nombre_usuario}")
-                    enlace_correo = f"https://mail.google.com/mail/?view=cm&fs=1&to={correo_usuario}&su={asunto_codificado}&body={texto_codificado}"
-                    page.launch_url(enlace_correo)
-                    
-            except Exception:
-                notificar("Error al procesar reporte", "red700")
-
-        dialogo_reporte = ft.AlertDialog(
-            title=ft.Text("Compartir Balance", weight=ft.FontWeight.BOLD), 
-            content=ft.Column([
-                ft.Text("Selecciona el medio para enviar tu estado de cuenta detallado."), 
-                opcion_envio_reporte
-            ], tight=True), 
-            actions=[
-                ft.FilledButton("Compartir", on_click=procesar_envio_reporte, style=ft.ButtonStyle(bgcolor="blue500", color="white")), 
-                ft.TextButton("Cancelar", on_click=lambda e: cerrar_dialogo())
-            ], 
-            actions_alignment=ft.MainAxisAlignment.CENTER
-        )
-        
-        page.overlay.append(dialogo_reporte)
-
-        def abrir_dialogo_reporte(e):
-            dialogo_reporte.open = True
-            page.update()
-
-        def cerrar_dialogo():
-            dialogo_reporte.open = False
-            page.update()
+                # Invocación ACTUALIZADA usando el nuevo servicio de Flet 1.0+
+                ft.UrlLauncher().launch_url(f"whatsapp://send?phone={tel_limpio}&text={texto_codificado}")
+            except Exception as e:
+                notificar(f"Error abriendo WhatsApp", "red700")
 
         page.add(
             contenedor_balance,
@@ -274,18 +235,18 @@ def main(page: ft.Page):
             ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color="grey400", size=12),
             lista_historial, 
             ft.ElevatedButton(
-                "Compartir Reporte", 
+                "Enviar mi Reporte por WhatsApp", 
                 icon="share", 
-                bgcolor="blue600", 
+                bgcolor="green500", 
                 color="white",
-                on_click=abrir_dialogo_reporte,
+                on_click=enviar_reporte,
                 width=float('inf') 
             )
         )
         cargar_datos()
 
     # ==========================================
-    # 5. CONTROL DE ACCESO INICIAL BLINDADO
+    # 5. CONTROL DE ACCESO INICIAL
     # ==========================================
     try:
         conexion = sqlite3.connect(DB_NAME)
@@ -299,7 +260,7 @@ def main(page: ft.Page):
         else:
             mostrar_registro()
     except Exception as e:
-        # Atrapa cualquier fallo en el arranque y fuerza el registro para que nunca quede en blanco
         mostrar_registro()
 
-ft.app(target=main)
+# EJECUCIÓN ACTUALIZADA PARA FLET 1.0+ (Reemplaza a ft.app)
+ft.run(main)
