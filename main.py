@@ -264,4 +264,4 @@ def main(page: ft.Page):
         # Atrapa errores de acceso al archivo en el arranque
         mostrar_registro()
 
-ft.app(target=main)
+ft.run(main)
