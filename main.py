@@ -13,7 +13,7 @@ def main(page: ft.Page):
     page.window.height = 680
     page.title = "Mi Balance"
     page.theme_mode = ft.ThemeMode.DARK
-    page.bgcolor = "#263238" # HEX nativo seguro
+    page.bgcolor = "#263238" 
     page.padding = 20
 
     # ==========================================
@@ -31,7 +31,6 @@ def main(page: ft.Page):
         DB_NAME = "finanzas_respaldo.db"
 
     def inicializar_bd():
-        # Bloque try-except obligatorio para evitar pantalla en blanco en Android
         try:
             conexion = sqlite3.connect(DB_NAME)
             cursor = conexion.cursor()
@@ -218,8 +217,13 @@ def main(page: ft.Page):
                     
                 texto_codificado = urllib.parse.quote(texto)
                 tel_limpio = telefono_usuario.replace('+', '').replace(' ', '')
+                enlace_wa = f"whatsapp://send?phone={tel_limpio}&text={texto_codificado}"
                 
-                page.launch_url(f"whatsapp://send?phone={tel_limpio}&text={texto_codificado}")
+                # Ejecución adaptativa segura para los enlaces
+                if hasattr(ft, 'UrlLauncher'):
+                    ft.UrlLauncher().launch_url(enlace_wa)
+                else:
+                    page.launch_url(enlace_wa)
             except Exception:
                 notificar("Error abriendo WhatsApp", "#D32F2F")
 
@@ -260,7 +264,10 @@ def main(page: ft.Page):
         else:
             mostrar_registro()
     except Exception as e:
-        # Atrapa el fallo de lectura inicial y evita la pantalla en blanco
         mostrar_registro()
 
-ft.app(target=main)
+# BLOQUE DE ARRANQUE ADAPTATIVO A PRUEBA DE FALLOS
+if hasattr(ft, 'app'):
+    ft.app(target=main)
+elif hasattr(ft, 'run'):
+    ft.run(main)
