@@ -13,14 +13,14 @@ def main(page: ft.Page):
     page.window.height = 680
     page.title = "Mi Balance"
     page.theme_mode = ft.ThemeMode.DARK
-    page.bgcolor = "#263238" 
+    page.bgcolor = "#263238" # HEX real seguro para evitar error de parseo[cite: 1]
     page.padding = 20
 
     # ==========================================
     # 2. BASE DE DATOS BLINDADA (MÓVIL)
     # ==========================================
     try:
-        if page.platform == ft.PagePlatform.ANDROID or page.platform == ft.PagePlatform.IOS:
+        if page.platform in [ft.PagePlatform.ANDROID, ft.PagePlatform.IOS]:
             directorio_base = Path(page.get_user_data_dir())
         else:
             directorio_base = Path(os.getcwd())
@@ -31,6 +31,7 @@ def main(page: ft.Page):
         DB_NAME = "finanzas_respaldo.db"
 
     def inicializar_bd():
+        # Bloque try-except para evitar pantalla en gris por permisos[cite: 1]
         try:
             conexion = sqlite3.connect(DB_NAME)
             cursor = conexion.cursor()
@@ -51,8 +52,8 @@ def main(page: ft.Page):
 
     inicializar_bd()
 
-    def notificar(mensaje, color="#388E3C"):
-        snack = ft.SnackBar(ft.Text(mensaje, color="white"), bgcolor=color, duration=3000)
+    def notificar(mensaje, color="#388E3C"): 
+        snack = ft.SnackBar(ft.Text(mensaje, color="#FFFFFF"), bgcolor=color, duration=3000)
         page.overlay.append(snack)
         snack.open = True
         page.update()
@@ -83,17 +84,17 @@ def main(page: ft.Page):
                 except Exception as ex:
                     notificar(f"Error al guardar: {ex}", "#D32F2F")
             else:
-                notificar("Por favor completa todos los campos", "#F57C00")
+                notificar("Por favor completa todos los campos", "#F57C00") 
 
         page.add(
             ft.Icon("account_circle", size=80, color="#42A5F5"),
             ft.Text("Bienvenido", size=28, weight=ft.FontWeight.BOLD),
-            ft.Text("Configura tu perfil para los reportes", size=14, color="#B0BEC5"),
-            ft.Divider(height=20, color="transparent"),
+            ft.Text("Configura tu perfil para los reportes", size=14, color="#8AFFFFFF"), 
+            ft.Divider(height=20, color="#00000000"),
             txt_nombre,
             txt_telefono,
             txt_correo,
-            ft.Divider(height=10, color="transparent"),
+            ft.Divider(height=10, color="#00000000"),
             ft.FilledButton("Guardar y Comenzar", on_click=guardar_perfil, width=300, style=ft.ButtonStyle(bgcolor="#1E88E5"))
         )
 
@@ -107,10 +108,10 @@ def main(page: ft.Page):
         
         nombre_usuario, telefono_usuario, correo_usuario = datos_usuario
 
-        texto_balance = ft.Text("$0.00", size=45, weight=ft.FontWeight.BOLD, color="white")
+        texto_balance = ft.Text("$0.00", size=45, weight=ft.FontWeight.BOLD, color="#FFFFFF")
         contenedor_balance = ft.Container(
             content=ft.Column([
-                ft.Text(f"CAPITAL DE {nombre_usuario.upper()}", size=12, color="#B0BEC5", weight=ft.FontWeight.BOLD),
+                ft.Text(f"CAPITAL DE {nombre_usuario.upper()}", size=12, color="#B3FFFFFF", weight=ft.FontWeight.BOLD), 
                 texto_balance
             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             alignment=ft.Alignment.CENTER,
@@ -161,7 +162,7 @@ def main(page: ft.Page):
                         content=ft.ListTile(
                             leading=ft.Icon(icono, color=color_icono),
                             title=ft.Text(concepto, weight=ft.FontWeight.BOLD),
-                            subtitle=ft.Text(fecha, color="#B0BEC5", size=12),
+                            subtitle=ft.Text(fecha, color="#8AFFFFFF", size=12),
                             trailing=ft.Text(f"{signo}${monto:.2f}", color=color_icono, weight=ft.FontWeight.BOLD, size=16)
                         )
                     )
@@ -223,7 +224,7 @@ def main(page: ft.Page):
                     ft.UrlLauncher().launch_url(enlace_wa)
                 else:
                     page.launch_url(enlace_wa)
-            except Exception:
+            except Exception as e:
                 notificar("Error abriendo WhatsApp", "#D32F2F")
 
         page.add(
@@ -234,14 +235,14 @@ def main(page: ft.Page):
                 ft.FilledButton("Ingreso", icon="add", style=ft.ButtonStyle(bgcolor="#43A047"), on_click=lambda e: agregar_movimiento(e, "ingreso"), expand=True),
                 ft.FilledButton("Gasto", icon="remove", style=ft.ButtonStyle(bgcolor="#E53935"), on_click=lambda e: agregar_movimiento(e, "gasto"), expand=True)
             ]),
-            ft.Divider(height=15, color="transparent"),
-            ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color="#B0BEC5", size=12),
+            ft.Divider(height=15, color="#00000000"),
+            ft.Text("HISTORIAL DE MOVIMIENTOS", weight=ft.FontWeight.BOLD, color="#8AFFFFFF", size=12),
             lista_historial, 
             ft.ElevatedButton(
                 "Enviar mi Reporte por WhatsApp", 
                 icon="share", 
                 bgcolor="#4CAF50", 
-                color="white",
+                color="#FFFFFF",
                 on_click=enviar_reporte,
                 width=float('inf') 
             )
@@ -263,8 +264,10 @@ def main(page: ft.Page):
         else:
             mostrar_registro()
     except Exception as e:
+        # Atrapa el fallo de lectura inicial y evita la pantalla en gris[cite: 1]
         mostrar_registro()
 
+# Bloque de arranque adaptativo
 if hasattr(ft, 'app'):
     ft.app(target=main)
 elif hasattr(ft, 'run'):
